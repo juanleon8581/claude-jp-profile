@@ -8,7 +8,7 @@ Mi perfil de Claude Code como plugin privado `mp` (_my-profile_) más un marketp
 | --------------------- | --------------------------------------------------------------------------------------------------------------- |
 | `plugins/mp/skills`   | `flow`, `flow-auto`, `taiga-sprint-rollover`, `taiga-ticket-docs`                                               |
 | `plugins/mp/agents`   | `flow-architect`, `flow-coder`, `flow-tester`, `flow-reviewer`, `flow-documenter`                               |
-| `plugins/mp/commands` | `commit`, `commit-changes`, `commit-convention`, `changelog`, `release`, `release-pr`, `ship`                   |
+| `plugins/mp/commands` | `doctor`, `commit`, `commit-changes`, `commit-convention`, `changelog`, `release`, `release-pr`, `ship`                   |
 | `plugins/mp/hooks`    | Hook SessionStart que inyecta `profile-instructions.md` (regla de context7)                                     |
 | `bootstrap/`          | Lo que un plugin no puede aportar: permisos, plugins de terceros, statusline, MCP de Taiga y skills de Supabase |
 
@@ -71,7 +71,7 @@ Otros datos por equipo:
 - **Context7**: `setup.sh` ejecuta `npx ctx7 setup --cli --claude`. Muestra un link y un código (device flow): ábrelo en cualquier navegador e inicia sesión. La key queda gestionada por ctx7; se administra en https://context7.com/dashboard. Para saltarlo: `SKIP_CTX7=1 ./bootstrap/setup.sh`.
 - **Plugins de terceros**: se descargan solos al abrir claude la primera vez (confirma la instalación si lo pide).
 
-Verificación rápida: `claude mcp list` (debe mostrar `taiga` conectado) y `/plugin` (debe listar `mp`).
+Verificación: `/mp:doctor` revisa requisitos, secretos (sin imprimirlos), settings, MCPs, plugins recomendados, duplicados locales y el hook anti-firma. También sirve fuera de claude: `bash plugins/mp/scripts/doctor.sh` (exit 1 si hay errores).
 
 ## Flujo de actualización
 

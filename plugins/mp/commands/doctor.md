@@ -1,0 +1,18 @@
+---
+description: "Diagnostica el perfil mp: requisitos, secretos, settings, MCPs, plugins recomendados y duplicados locales"
+allowed-tools: Bash(bash:*)
+---
+
+# /mp:doctor
+
+Ejecuta el diagnóstico (solo lectura, no imprime valores de secretos):
+
+```bash
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/doctor.sh"
+```
+
+Después:
+1. Muestra el resumen tal cual (✔ ok, ⚠ aviso, ✖ error).
+2. Agrupa los ✖ y ⚠ por causa y da los comandos exactos para corregirlos, en orden.
+3. No modifiques nada sin que el usuario lo pida. Si falta algo que `bootstrap/setup.sh` resuelve, propón correrlo.
+4. Nota: los secretos se leen del entorno del proceso. Si acabas de editar `~/.claude-mp.env`, hay que reabrir claude desde un shell que haya hecho `source`.
