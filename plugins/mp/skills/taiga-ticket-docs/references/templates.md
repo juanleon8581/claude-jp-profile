@@ -21,9 +21,9 @@ la misma estructura y emojis.
 
 ## ✅ Criterios de aceptación
 
-- [ ] Criterio verificable 1
-- [ ] Criterio verificable 2
-- [ ] Criterio verificable 3
+- Criterio verificable 1
+- Criterio verificable 2
+- Criterio verificable 3
 
 ## 📌 Notas
 
@@ -101,8 +101,8 @@ Descripción concreta de la tarea.
 
 ## ✅ Checklist
 
-- [ ] Paso 1
-- [ ] Paso 2
+- Paso 1
+- Paso 2
 
 ## 🔗 Relacionado
 

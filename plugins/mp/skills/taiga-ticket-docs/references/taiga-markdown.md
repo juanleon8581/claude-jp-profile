@@ -12,7 +12,7 @@ solo lo de esta lista; ante duda, prefiere la opción conservadora.
 | Cursiva | `*texto*` | |
 | Lista simple | `- item` | |
 | Lista numerada | `1. item` | Para pasos secuenciales (reproducción de bugs) |
-| Checklist | `- [ ] item` / `- [x] item` | Taiga los renderiza interactivos |
+| Lista | `- item` | Para criterios y pasos usa guiones; **no uses casillas `- [ ]`/`- [x]`** en tickets del flujo |
 | Tabla | `\| col \| col \|` | Útil para comparar entorno, casos |
 | Código inline | `` `código` `` | |
 | Código en bloque | ```` ```lang ``` ```` | |

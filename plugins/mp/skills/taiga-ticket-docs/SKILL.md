@@ -19,7 +19,12 @@ se entiende sin explicación adicional y se escanea en segundos.
 3. **Idioma adaptado**: no asumas español por defecto. Detecta el idioma predominante del proyecto/
    ticket y escribe en ese idioma (base español + término técnico en inglés entre paréntesis si el
    proyecto es hispanohablante; si el proyecto es en inglés, escribe en inglés).
-4. **Aprobación obligatoria de comentarios**: `mcp__taiga__add_comment` NUNCA se llama en automático.
+4. **Documentación funcional, no técnica ni de proceso**: Taiga es información para personas no técnicas
+   de otras áreas. Describe qué cambia o queda disponible para la persona o el negocio. No menciones el
+   comportamiento de agentes, quién decidió algo, el flujo de trabajo, OpenSpec, el brief, pruebas
+   automáticas, cobertura, código ni archivos. Detalle y lista de exclusiones:
+   [references/redaccion.md](references/redaccion.md#audiencia-funcional-e-informativa-no-técnica-ni-de-proceso).
+5. **Aprobación obligatoria de comentarios**: `mcp__taiga__add_comment` NUNCA se llama en automático.
    Todo comentario se muestra primero al usuario en texto plano y se envía solo tras su aprobación
    explícita. Esto aplica a cualquier comentario (seguimiento, aclaración, cierre, etc.), no solo a
    la creación/edición de tickets.
@@ -53,8 +58,9 @@ se entiende sin explicación adicional y se escanea en segundos.
 ## Reglas rápidas
 
 - Un ticket = una unidad de valor entendible sola, sin depender de contexto externo.
-- Criterios de aceptación en user stories: checklist `- [ ]` en lenguaje natural (no Gherkin salvo
-  que el usuario lo pida explícitamente).
+- Criterios de aceptación en user stories: lista con guiones `- ` en lenguaje natural, **nunca casillas
+  `[ ]`** (el avance se documenta con estado y comentario, no marcando casillas); no Gherkin salvo que el
+  usuario lo pida explícitamente.
 - Issues (bugs) siempre llevan pasos de reproducción numerados y resultado esperado vs. actual.
 - No inventes datos (entorno, IDs, links) que el usuario no dio — pregunta o deja el placeholder
   explícito (`_pendiente_`).
