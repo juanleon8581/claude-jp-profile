@@ -21,6 +21,7 @@ if have node; then
   v=$(node -p 'process.versions.node' 2>/dev/null); maj=${v%%.*}; min=${v#*.}; min=${min%%.*}
   if [ "$maj" -gt 22 ] || { [ "$maj" -eq 22 ] && [ "$min" -ge 13 ]; }; then pass "node $v (≥ 22.13)"; else wrn "node $v" "caveman/context-mode piden ≥ 22.13"; fi
 fi
+have python3 && pass "python3 ($(python3 --version 2>&1 | cut -d' ' -f2))" || bad "python3 no está instalado" "lo usa el buscador de ui-ux-pro-max (flow-designer); brew install python"
 have gh && { gh auth status >/dev/null 2>&1 && pass "gh autenticado" || wrn "gh sin sesión" "gh auth login"; }
 
 sec "settings.json"

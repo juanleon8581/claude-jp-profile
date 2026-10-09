@@ -15,6 +15,7 @@ if [ -n "${CLAUDE_CONFIG_DIR:-}" ]; then CJ="$CFG/.claude.json"; else CJ="$HOME/
 export CLAUDE_CONFIG_DIR="$CFG"
 for c in jq claude; do command -v "$c" >/dev/null || { echo "Falta $c"; exit 1; }; done
 mkdir -p "$CFG"
+command -v python3 >/dev/null || echo "!! Aviso: falta python3 (lo usa ui-ux-pro-max / flow-designer); instálalo con brew install python"
 
 # 1) settings.json: deep merge; allow/ask se unen sin duplicar
 [ -f "$CFG/settings.json" ] || echo '{}' > "$CFG/settings.json"
