@@ -49,6 +49,15 @@ else
   else curl -fsSL https://terminal-browser.sh/install | bash; fi \
     || echo "!! terminal-browser no se instaló; hazlo a mano: curl -fsSL https://terminal-browser.sh/install | bash"
 fi
+# `terminal-browser setup` instala la skill del agente ($CFG/skills/terminal-browser); sin ella /browser no funciona
+if command -v terminal-browser >/dev/null; then
+  if [ -e "$CFG/skills/terminal-browser" ]; then
+    echo "= terminal-browser setup ya aplicado"
+  else
+    echo "+ terminal-browser setup"
+    terminal-browser setup || echo "!! terminal-browser setup falló; ejecútalo a mano: terminal-browser setup"
+  fi
+fi
 
 # 3) MCPs a nivel usuario
 prev(){ [ -f "$CJ" ] && jq -r "$1 // empty" "$CJ" 2>/dev/null || true; }
