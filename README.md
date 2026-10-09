@@ -20,8 +20,10 @@ Se instalan por fuera del plugin (desde su origen):
 - **Supabase**: plugins oficiales `supabase` y `postgres-best-practices` del marketplace `supabase/agent-skills` (activados en `enabledPlugins`).
 - **MCP de Context7**: remoto (`https://mcp.context7.com/mcp`), a nivel usuario, con `CONTEXT7_API_KEY` del entorno; lo registra `setup.sh` igual que el de Taiga.
 - **terminal-browser**: `setup.sh` instala el binario (brew o `curl -fsSL https://terminal-browser.sh/install | bash`) si falta; el plugin y `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1` vienen en `settings.base.json`. Uso: `/browser` dentro de claude (requiere ghostty/kitty, sin tmux). Actualizar el binario: `terminal-browser upgrade`.
+- **MCP de shadcn**: local (`npx shadcn@latest mcp`), a nivel usuario y sin secretos; lo registra `setup.sh`. Permite explorar el registry y añadir componentes con lenguaje natural ([docs](https://ui.shadcn.com/docs/mcp)). Para listar registries propios, el proyecto necesita su `components.json`.
 - **Taiga**: MCP a nivel usuario, registrado por `setup.sh` (tools `mcp__taiga__*`).
 - **Requeridos de terceros** (desde sus marketplaces de GitHub, vía `enabledPlugins`): `context-mode@context-mode` (`mksglu/context-mode`) y `caveman@caveman` (`JuliusBrussee/caveman`). Más `skill-creator@claude-plugins-official`.
+- **Diseño UI/UX**: `ui-ux-pro-max@ui-ux-pro-max-skill` (`nextlevelbuilder/ui-ux-pro-max-skill`), `impeccable@impeccable` (`pbakaus/impeccable`) y `taste-skill@taste-skill` (`Leonxlnx/taste-skill`), declarados en `enabledPlugins` e instalados por `setup.sh` (`claude plugin marketplace add` + `claude plugin install`, omite los ya instalados). Impeccable requiere además, por proyecto, correr `/impeccable init` y `/impeccable hooks on` y aprobar sus hooks (paso 2 en https://impeccable.style/#downloads).
 
 ## Instalación en un equipo nuevo
 

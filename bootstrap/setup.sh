@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Prepara un equipo: settings base, statusline, MCPs de Taiga y Context7 (scope user, valores
+# Prepara un equipo: settings base, statusline, MCPs de Taiga, Context7 y shadcn (scope user, valores
 # literales en ~/.claude.json, independientes del plugin) y ctx7 setup.
 # Idempotente: detecta lo ya aplicado y solo ejecuta lo que falta o cambió (reporta "ya aplicado").
 # RECONFIGURE=1 vuelve a preguntar los valores de los MCP aunque ya existan.
@@ -59,6 +59,21 @@ if command -v terminal-browser >/dev/null; then
   fi
 fi
 
+# 2c) Plugins de diseño (marketplace de GitHub + install); settings.base.json solo los declara/habilita
+IP="$CFG/plugins/installed_plugins.json"
+for entry in "nextlevelbuilder/ui-ux-pro-max-skill ui-ux-pro-max@ui-ux-pro-max-skill" \
+             "pbakaus/impeccable impeccable@impeccable" \
+             "Leonxlnx/taste-skill taste-skill@taste-skill"; do
+  repo="${entry%% *}"; plug="${entry##* }"
+  if [ -f "$IP" ] && jq -e --arg p "$plug" '.plugins[$p]' "$IP" >/dev/null 2>&1; then
+    echo "= plugin $plug ya aplicado"
+  else
+    echo "+ plugin $plug"
+    { claude plugin marketplace add "$repo" >/dev/null && claude plugin install "$plug" >/dev/null; } \
+      || echo "!! $plug no se instaló; hazlo a mano: /plugin marketplace add $repo  y  /plugin install $plug"
+  fi
+done
+
 # 3) MCPs a nivel usuario
 prev(){ [ -f "$CJ" ] && jq -r "$1 // empty" "$CJ" 2>/dev/null || true; }
 ask(){ # ask VAR "etiqueta" "expr jq del registro previo" [secret] [default]
@@ -101,6 +116,14 @@ else
   claude mcp add-json --scope user context7 "$(jq -nc --arg k "$CONTEXT7_API_KEY" --arg u "$C7_URL" \
     '{type:"http",url:$u,headers:{CONTEXT7_API_KEY:$k}}')" >/dev/null && echo "+ MCP context7 registrado"
 fi
+# shadcn: stdio vía npx, sin secretos (https://ui.shadcn.com/docs/mcp)
+SHADCN_JSON='{"type":"stdio","command":"npx","args":["shadcn@latest","mcp"]}'
+if has_mcp shadcn && [ "$(jq -cS .mcpServers.shadcn "$CJ")" = "$(printf '%s' "$SHADCN_JSON" | jq -cS .)" ]; then
+  echo "= MCP shadcn ya aplicado"
+else
+  claude mcp remove shadcn --scope user >/dev/null 2>&1 || true
+  claude mcp add-json --scope user shadcn "$SHADCN_JSON" >/dev/null && echo "+ MCP shadcn registrado"
+fi
 chmod 600 "$CJ" 2>/dev/null || true
 
 # 4) Context7 con su instalador oficial (OAuth por device flow: link + código). Ver README.
@@ -112,4 +135,5 @@ else
 fi
 
 echo "Listo. Verifica con /mp:doctor. Terminal browser: abre claude y corre /browser (requiere ghostty/kitty)."
+echo "Impeccable (por proyecto): en claude -> /impeccable init  y  /impeccable hooks on  (y aprobar sus hooks)."
 echo "Siguiente: en claude -> /plugin marketplace add juanleon8581/claude-jp-profile  y  /plugin install mp@mp-marketplace"

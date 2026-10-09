@@ -31,6 +31,7 @@ if [ -f "$SET" ] && jq -e . "$SET" >/dev/null 2>&1; then
   chk '.autoCompactEnabled == true' "autoCompactEnabled"
   chk '.autoCompactWindow == 420000' "autoCompactWindow = 420000"
   chk '.permissions.allow | index("mcp__taiga")' "permiso mcp__taiga"
+  chk '.permissions.allow | index("mcp__shadcn")' "permiso mcp__shadcn"
   chk '.permissions.ask | index("mcp__taiga__delete_task")' "ask en borrados de Taiga"
   chk '.env.CLAUDE_CODE_ENABLE_FUNCTION_HOOKS == "1"' "env CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 (terminal-browser)"
   jq -e '.model' "$SET" >/dev/null 2>&1 && pass "model definido en este equipo ($(jq -r .model "$SET"))" || wrn "model no definido" "elígelo con /model"
@@ -38,7 +39,7 @@ else bad "$SET ausente o inválido" "corre bootstrap/setup.sh"; fi
 
 sec "Plugins"
 IP="$CFG/plugins/installed_plugins.json"
-for p in mp@mp-marketplace caveman@caveman context-mode@context-mode skill-creator@claude-plugins-official supabase@supabase-agent-skills postgres-best-practices@supabase-agent-skills terminal-browser@terminal-browser; do
+for p in mp@mp-marketplace caveman@caveman context-mode@context-mode skill-creator@claude-plugins-official supabase@supabase-agent-skills postgres-best-practices@supabase-agent-skills terminal-browser@terminal-browser ui-ux-pro-max@ui-ux-pro-max-skill impeccable@impeccable taste-skill@taste-skill; do
   if [ -f "$IP" ] && jq -e --arg p "$p" '.plugins[$p]' "$IP" >/dev/null 2>&1; then pass "$p instalado"
   elif [ -f "$SET" ] && jq -e --arg p "$p" '.enabledPlugins[$p]' "$SET" >/dev/null 2>&1; then wrn "$p habilitado pero aún no instalado" "abre claude para que lo descargue o /plugin install $p"
   else bad "$p no está instalado" "/plugin install $p"; fi
@@ -63,7 +64,11 @@ if [ -f "$CJ" ] && jq -e . "$CJ" >/dev/null 2>&1; then
     k=$(val '.mcpServers.context7.headers.CONTEXT7_API_KEY'); [ -n "$k" ] || k=$(val '(.mcpServers.context7.headers.Authorization // "") | sub("^Bearer +";"")')
     [ -n "$k" ] && pass "context7: API key con valor" || bad "context7: API key vacía" "re-ejecuta bootstrap/setup.sh"
   else bad "MCP context7 no registrado" "corre bootstrap/setup.sh"; fi
-  jq -e '[.mcpServers.taiga, .mcpServers.context7] | tostring | test("\$\{")' "$CJ" >/dev/null 2>&1 \
+  if [ -n "$(val '.mcpServers.shadcn')" ]; then
+    pass "MCP shadcn registrado"
+    [ "$(val '.mcpServers.shadcn.command')" = "npx" ] && have npx && pass "shadcn: npx disponible" || bad "shadcn: falta npx o el comando no es npx" "instala node y re-ejecuta bootstrap/setup.sh"
+  else bad "MCP shadcn no registrado" "corre bootstrap/setup.sh"; fi
+  jq -e '[.mcpServers.taiga, .mcpServers.context7, .mcpServers.shadcn] | tostring | test("\$\{")' "$CJ" >/dev/null 2>&1 \
     && wrn "un MCP usa \${VAR} sin resolver" "re-ejecuta bootstrap/setup.sh"
 else bad "$CJ ausente o inválido" "corre bootstrap/setup.sh"; fi
 

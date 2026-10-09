@@ -9,7 +9,8 @@
       "Bash(pnpm test:coverage)",
       "Bash(ls:*)",
       "Bash(git:*)",
-      "mcp__taiga"
+      "mcp__taiga",
+      "mcp__shadcn"
     ],
     "ask": [
       "mcp__taiga__delete_epic",
@@ -38,7 +39,10 @@
     "context-mode@context-mode": true,
     "supabase@supabase-agent-skills": true,
     "postgres-best-practices@supabase-agent-skills": true,
-    "terminal-browser@terminal-browser": true
+    "terminal-browser@terminal-browser": true,
+    "ui-ux-pro-max@ui-ux-pro-max-skill": true,
+    "impeccable@impeccable": true,
+    "taste-skill@taste-skill": true
   },
   "extraKnownMarketplaces": {
     "mp-marketplace": {
@@ -69,6 +73,24 @@
       "source": {
         "source": "github",
         "repo": "zenbu-labs/terminal-browser"
+      }
+    },
+    "ui-ux-pro-max-skill": {
+      "source": {
+        "source": "github",
+        "repo": "nextlevelbuilder/ui-ux-pro-max-skill"
+      }
+    },
+    "impeccable": {
+      "source": {
+        "source": "github",
+        "repo": "pbakaus/impeccable"
+      }
+    },
+    "taste-skill": {
+      "source": {
+        "source": "github",
+        "repo": "Leonxlnx/taste-skill"
       }
     }
   },
