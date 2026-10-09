@@ -1,0 +1,12 @@
+{
+  "name": "mp-marketplace",
+  "owner": { "name": "JP León" },
+  "metadata": { "description": "Marketplace privado con mi perfil de Claude Code (mp = my-profile)." },
+  "plugins": [
+    {
+      "name": "mp",
+      "source": "./plugins/mp",
+      "description": "Mi perfil de Claude Code: flow, flow-auto, agentes flow-*, skills de Taiga y comandos de commit/release."
+    }
+  ]
+}

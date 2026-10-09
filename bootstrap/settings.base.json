@@ -1,0 +1,67 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm vitest:*)",
+      "Bash(pnpm dlx:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm test:coverage)",
+      "Bash(ls:*)",
+      "Bash(git:*)",
+      "mcp__taiga"
+    ],
+    "ask": [
+      "mcp__taiga__delete_epic",
+      "mcp__taiga__delete_issue",
+      "mcp__taiga__delete_milestone",
+      "mcp__taiga__delete_role",
+      "mcp__taiga__delete_task",
+      "mcp__taiga__delete_userstory",
+      "mcp__taiga__delete_webhook",
+      "mcp__taiga__delete_wiki_page"
+    ],
+    "defaultMode": "auto"
+  },
+  "language": "español",
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline.sh"
+  },
+  "enabledPlugins": {
+    "mp@mp-marketplace": true,
+    "caveman@caveman": true,
+    "skill-creator@claude-plugins-official": true,
+    "context-mode@context-mode": true,
+    "supabase@supabase-agent-skills": true,
+    "postgres-best-practices@supabase-agent-skills": true
+  },
+  "extraKnownMarketplaces": {
+    "mp-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "juanleon8581/claude-jp-profile"
+      }
+    },
+    "caveman": {
+      "source": {
+        "source": "github",
+        "repo": "JuliusBrussee/caveman"
+      }
+    },
+    "context-mode": {
+      "source": {
+        "source": "github",
+        "repo": "mksglu/context-mode"
+      }
+    },
+    "supabase-agent-skills": {
+      "source": {
+        "source": "github",
+        "repo": "supabase/agent-skills"
+      }
+    }
+  },
+  "autoCompactEnabled": true,
+  "autoCompactWindow": 420000
+}
