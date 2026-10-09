@@ -11,8 +11,8 @@
 set -euo pipefail
 DIR="$(cd "$(dirname "$0")" && pwd)"
 CFG="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
-if [ -n "${CLAUDE_CONFIG_DIR:-}" ]; then CJ="$CFG/.claude.json"; else CJ="$HOME/.claude.json"; fi
-export CLAUDE_CONFIG_DIR="$CFG"
+# Solo se exporta si el usuario lo definió: si no, claude usa ~/.claude.json y exportarlo lo desviaría a ~/.claude/.claude.json
+if [ -n "${CLAUDE_CONFIG_DIR:-}" ]; then CJ="$CFG/.claude.json"; export CLAUDE_CONFIG_DIR="$CFG"; else CJ="$HOME/.claude.json"; fi
 for c in jq claude; do command -v "$c" >/dev/null || { echo "Falta $c"; exit 1; }; done
 mkdir -p "$CFG"
 command -v python3 >/dev/null || echo "!! Aviso: falta python3 (lo usa ui-ux-pro-max / flow-designer); instálalo con brew install python"
