@@ -27,43 +27,47 @@ Se instalan por fuera del plugin (desde su origen):
 Requisitos: `claude` (v1.0.33+), `jq`, `node`/`npx` (22.13+ por la statusline de caveman y context-mode), `gh`, `git`.
 
 ```bash
-# 1. Acceso al repo privado
-gh auth login
+# 1. Acceso al repo privado (HTTPS con las credenciales de gh)
+gh auth login && gh auth setup-git
 
-# 2. Clonar y ejecutar el bootstrap
+# 2. Clonar y ejecutar el bootstrap (pide los datos de los MCP; ver sección siguiente)
 git clone https://github.com/juanleon8581/claude-jp-profile ~/claude-jp-profile
 ~/claude-jp-profile/bootstrap/setup.sh
 
-# 3. Completar secretos (ver sección siguiente) y cargarlos en el shell
-echo '[ -f ~/.claude-mp.env ] && source ~/.claude-mp.env' >> ~/.zshrc
-source ~/.zshrc
-
-# 4. Dentro de claude
+# 3. Dentro de claude
 /plugin marketplace add juanleon8581/claude-jp-profile
 /plugin install mp@mp-marketplace
+/mp:doctor
 ```
 
-## Secretos y datos que faltan en cada equipo
+## Datos de los MCP (Taiga y Context7)
 
-Nada sensible vive en este repo. `setup.sh` crea `~/.claude-mp.env` (permisos `600`) con estas variables vacías:
+Los MCP son **independientes del plugin**: `setup.sh` los registra a nivel usuario con los valores literales en `~/.claude.json` (permisos `600`). No hay archivo `.env` ni variables de entorno que cargar, y funcionan desde cualquier shell, `tmux` o daemon. Nada sensible vive en este repo.
 
-| Variable           | Qué es                                  | De dónde sale                                      |
-| ------------------ | --------------------------------------- | -------------------------------------------------- |
-| `TAIGA_URL`        | URL de tu Taiga, sin `/` final          | Tu instancia, p. ej. `https://taiga.miempresa.com` |
-| `TAIGA_USERNAME`   | Usuario de Taiga                        | Tu cuenta de Taiga                                 |
-| `TAIGA_PASSWORD`   | Contraseña de Taiga                     | Tu cuenta de Taiga (gestor de contraseñas)         |
-| `CONTEXT7_API_KEY` | API key del MCP de Context7 | https://context7.com/dashboard → API Keys |
-| `TAIGA_MCP_PATH`   | Ruta absoluta a `dist/index.js` del MCP | Ver build abajo                                    |
+`setup.sh` obtiene cada valor, en este orden: (1) variables pasadas al ejecutarlo, (2) el registro que ya exista en la config de claude, (3) prompt interactivo (contraseña y key con lectura silenciosa).
+
+| Dato | Qué es | De dónde sale |
+| --- | --- | --- |
+| `TAIGA_URL` | URL de Taiga, sin `/` final | Tu instancia, p. ej. `https://taiga.miempresa.com` |
+| `TAIGA_USERNAME` | Usuario de Taiga | Tu cuenta |
+| `TAIGA_PASSWORD` | Contraseña de Taiga | Tu cuenta (gestor de contraseñas) |
+| `TAIGA_MCP_PATH` | Ruta a `dist/index.js` del MCP | Build de abajo (por defecto `~/local-mcp/taiga-mcp/dist/index.js`) |
+| `CONTEXT7_API_KEY` | API key de Context7 | https://context7.com/dashboard → API Keys |
+
+Sin preguntas (p. ej. por SSH sin TTY):
+```bash
+TAIGA_URL=... TAIGA_USERNAME=... TAIGA_PASSWORD=... TAIGA_MCP_PATH=... CONTEXT7_API_KEY=... ./bootstrap/setup.sh
+```
+(Los valores pasan brevemente por la lista de procesos al registrar el MCP; es una limitación de `claude mcp add-json`.)
 
 **Build del MCP de Taiga** (una vez por equipo):
 
 ```bash
 git clone https://github.com/juanleon8581/taiga-mcp ~/local-mcp/taiga-mcp
 cd ~/local-mcp/taiga-mcp && npm install && npm run build
-# TAIGA_MCP_PATH=$HOME/local-mcp/taiga-mcp/dist/index.js (valor por defecto del env)
 ```
 
-Cómo funciona: `setup.sh` registra el MCP con `${TAIGA_*}` sin valores; Claude Code las resuelve al iniciar leyendo el entorno del shell. Por eso hay que **abrir claude desde un shell que ya hizo `source`** del archivo. Si `/mcp` muestra `taiga` fallido, revisa primero `echo $TAIGA_URL`.
+Prueba aislada sin tocar la config real: `CLAUDE_CONFIG_DIR=~/.claude-test ./bootstrap/setup.sh` y luego `CLAUDE_CONFIG_DIR=~/.claude-test claude` (pide login aparte).
 
 Otros datos por equipo:
 
@@ -71,7 +75,7 @@ Otros datos por equipo:
 - **Context7**: `setup.sh` ejecuta `npx ctx7 setup --cli --claude`. Muestra un link y un código (device flow): ábrelo en cualquier navegador e inicia sesión. La key queda gestionada por ctx7; se administra en https://context7.com/dashboard. Para saltarlo: `SKIP_CTX7=1 ./bootstrap/setup.sh`.
 - **Plugins de terceros**: se descargan solos al abrir claude la primera vez (confirma la instalación si lo pide).
 
-Verificación: `/mp:doctor` revisa requisitos, secretos (sin imprimirlos), settings, MCPs, plugins recomendados, duplicados locales y el hook anti-firma. También sirve fuera de claude: `bash plugins/mp/scripts/doctor.sh` (exit 1 si hay errores).
+Verificación: `/mp:doctor` revisa requisitos, settings, MCPs (que estén registrados y con valores, sin imprimirlos), plugins recomendados, duplicados locales y el hook anti-firma. También sirve fuera de claude: `bash plugins/mp/scripts/doctor.sh` (exit 1 si hay errores).
 
 ## Flujo de actualización
 

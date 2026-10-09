@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Diagnóstico del perfil mp: requisitos, secretos, settings, MCPs, plugins y duplicados locales.
+# Diagnóstico del perfil mp: requisitos, settings, MCPs (con sus valores), plugins y duplicados locales.
 # Solo lectura. Nunca imprime valores de secretos. Exit 1 si hay algún ✖.
 set -uo pipefail
 CFG="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 SET="$CFG/settings.json"
-ENVF="$HOME/.claude-mp.env"
+if [ -n "${CLAUDE_CONFIG_DIR:-}" ]; then CJ="$CFG/.claude.json"; else CJ="$HOME/.claude.json"; fi
 ok=0; warn=0; fail=0
 G=$'\e[32m'; Y=$'\e[33m'; R=$'\e[31m'; D=$'\e[2m'; N=$'\e[0m'
 pass(){ echo "  ${G}✔${N} $1"; ok=$((ok+1)); }
@@ -22,21 +22,6 @@ if have node; then
   if [ "$maj" -gt 22 ] || { [ "$maj" -eq 22 ] && [ "$min" -ge 13 ]; }; then pass "node $v (≥ 22.13)"; else wrn "node $v" "caveman/context-mode piden ≥ 22.13"; fi
 fi
 have gh && { gh auth status >/dev/null 2>&1 && pass "gh autenticado" || wrn "gh sin sesión" "gh auth login"; }
-
-sec "Secretos (entorno del shell que lanzó claude)"
-[ -f "$ENVF" ] && pass "$ENVF existe" || bad "$ENVF no existe" "corre bootstrap/setup.sh"
-if [ -f "$ENVF" ]; then
-  m=$(stat -f '%Lp' "$ENVF" 2>/dev/null || stat -c '%a' "$ENVF" 2>/dev/null)
-  [ "$m" = "600" ] && pass "permisos 600" || wrn "permisos $m en $ENVF" "chmod 600 $ENVF"
-  grep -q 'claude-mp.env' "$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.zprofile" "$HOME/.bash_profile" 2>/dev/null \
-    && pass "se carga desde el rc del shell" || wrn "no se encontró 'source' en el rc del shell" "echo '[ -f ~/.claude-mp.env ] && source ~/.claude-mp.env' >> ~/.zshrc"
-fi
-for v in TAIGA_URL TAIGA_USERNAME TAIGA_PASSWORD CONTEXT7_API_KEY; do
-  [ -n "${!v:-}" ] && pass "$v definida" || bad "$v vacía o ausente en el entorno" "complétala en $ENVF y reabre el shell"
-done
-if [ -n "${TAIGA_MCP_PATH:-}" ]; then
-  [ -f "$TAIGA_MCP_PATH" ] && pass "TAIGA_MCP_PATH apunta a un archivo existente" || bad "TAIGA_MCP_PATH no existe: $TAIGA_MCP_PATH" "clona y compila taiga-mcp (ver README)"
-else bad "TAIGA_MCP_PATH vacía" "defínela en $ENVF"; fi
 
 sec "settings.json"
 if [ -f "$SET" ] && jq -e . "$SET" >/dev/null 2>&1; then
@@ -58,17 +43,26 @@ for p in mp@mp-marketplace caveman@caveman context-mode@context-mode skill-creat
   else bad "$p no está instalado" "/plugin install $p"; fi
 done
 
-sec "MCPs (nivel usuario, ~/.claude.json)"
-CJ="$HOME/.claude.json"
-for s in taiga context7; do
-  [ -f "$CJ" ] && jq -e --arg s "$s" '.mcpServers[$s]' "$CJ" >/dev/null 2>&1 && pass "MCP $s registrado" || bad "MCP $s no registrado" "corre bootstrap/setup.sh"
-done
-if [ -f "$CJ" ]; then
-  for s in taiga context7; do
-    jq -e --arg s "$s" '.mcpServers[$s] | tostring | test("[A-Za-z0-9]{24,}")' "$CJ" >/dev/null 2>&1 \
-      && wrn "MCP $s parece tener un secreto en texto plano en ~/.claude.json" "re-registra con setup.sh (usa \${VAR})"
-  done
-fi
+sec "MCPs (nivel usuario, $CJ)"
+if [ -f "$CJ" ] && jq -e . "$CJ" >/dev/null 2>&1; then
+  m=$(stat -f '%Lp' "$CJ" 2>/dev/null || stat -c '%a' "$CJ" 2>/dev/null)
+  case "$m" in *00) pass "permisos $m en la config (contiene secretos)";; *) wrn "permisos $m en $CJ (contiene secretos)" "chmod 600 $CJ";; esac
+  val(){ jq -r "$1 // empty" "$CJ" 2>/dev/null; }
+  if [ -n "$(val '.mcpServers.taiga')" ]; then
+    pass "MCP taiga registrado"
+    p=$(val '.mcpServers.taiga.args[0]')
+    [ -f "$p" ] && pass "taiga: $p existe" || bad "taiga: ruta inexistente (${p:-vacía})" "compila taiga-mcp y re-ejecuta bootstrap/setup.sh"
+    for k in TAIGA_URL TAIGA_USERNAME TAIGA_PASSWORD; do
+      [ -n "$(val ".mcpServers.taiga.env.$k")" ] && pass "taiga: $k con valor" || bad "taiga: $k vacío" "re-ejecuta bootstrap/setup.sh"
+    done
+  else bad "MCP taiga no registrado" "corre bootstrap/setup.sh"; fi
+  if [ -n "$(val '.mcpServers.context7')" ]; then
+    pass "MCP context7 registrado"
+    [ -n "$(val '.mcpServers.context7.headers.CONTEXT7_API_KEY')" ] && pass "context7: API key con valor" || bad "context7: API key vacía" "re-ejecuta bootstrap/setup.sh"
+  else bad "MCP context7 no registrado" "corre bootstrap/setup.sh"; fi
+  jq -e '[.mcpServers.taiga, .mcpServers.context7] | tostring | test("\$\{")' "$CJ" >/dev/null 2>&1 \
+    && wrn "un MCP usa \${VAR} sin resolver" "re-ejecuta bootstrap/setup.sh"
+else bad "$CJ ausente o inválido" "corre bootstrap/setup.sh"; fi
 
 sec "Context7 (ctx7 setup --cli)"
 [ -f "$CFG/rules/context7.md" ] && pass "regla rules/context7.md" || bad "falta $CFG/rules/context7.md" "npx ctx7 setup --cli --claude"
