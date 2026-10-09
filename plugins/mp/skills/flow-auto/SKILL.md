@@ -114,6 +114,12 @@ orquestador ◄── informe ◄── apply ◄────────┘  (p
    sin alterarlo. Si el usuario pide cambios, se vuelve al paso 1.
 4. El orquestador verifica el informe del `apply` y actualiza `taiga-sync.json` (el documentador no lo escribe).
 
+**Tono de lo que se documenta:** todo texto para Taiga es funcional e informativo, para personas no técnicas de
+otras áreas. Los payloads que prepara el orquestador o el documentador no describen el comportamiento de
+agentes, el flujo de trabajo, los artefactos internos ni detalles de pruebas o código (ver
+`taiga-ticket-docs/references/redaccion.md`). Si un texto aprobado necesita esa corrección, se corrige antes
+de mostrarlo al usuario.
+
 ### Política de aprobación (todo requerido por defecto)
 
 | Acción en Taiga | Aprobación del usuario |

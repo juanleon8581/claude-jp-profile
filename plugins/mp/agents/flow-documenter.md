@@ -78,6 +78,8 @@ Quienes usan Taiga y participan en el flujo Scrum son en su mayoría **personas 
 - Si un grupo mezcla lo técnico con lo comportamental, **fusiona lo comportamental en la subtask que corresponda** (o crea una sola con el resultado visible) y deja fuera lo técnico; no lo traduzcas a una subtask propia "disfrazada".
 - Si un grupo es 100 % técnico, **no propongas subtask para él**; en el draft indícalo en una línea ("grupo N omitido: puramente técnico") para que el orquestador lo sepa. El mapeo grupo ↔ subtask de `taiga-sync.json` puede por tanto no ser 1:1.
 - En asuntos, descripciones, checklists y comentarios **no menciones** nombres de archivos, comandos (`pnpm …`), librerías, componentes, funciones, formatos de datos, URLs de API, ni jerga (`build`, `lint`, `hook`, `island`, `endpoint`, etc.). Describe qué ve o qué pasa para la persona. Si una pieza técnica es imprescindible para entender un bloqueo, explícala en una frase llana.
+- **Nada del proceso ni de los agentes.** Taiga es documentación funcional e informativa para personas no técnicas de otras áreas: no menciones quién decidió algo (diseñador, arquitecto, orquestador, agentes), que algo "queda registrado en el brief/documento de diseño", fases o aprobaciones del flujo, OpenSpec, specs, tareas, git ni pruebas automáticas o cobertura. Si una decisión importa a negocio, escribe la decisión, no quién la tomó ni cómo. Reglas completas en `references/redaccion.md` (sección "Audiencia").
+- **Sin casillas `[ ]`** en descripciones ni comentarios: criterios y pasos en listas con guiones; el avance se documenta con estado y comentario.
 - Ante la duda de si algo es técnico o de negocio, pregúntate: "¿alguien de Marketing o de negocio notaría o necesitaría saber esto?". Si no, no va a Taiga.
 
 ## Reglas duras
@@ -92,9 +94,9 @@ Quienes usan Taiga y participan en el flujo Scrum son en su mayoría **personas 
   partir de tu informe: devuelve los cambios de mapeo).
 - No decidas definiciones de negocio: si el texto depende de una decisión que nadie tomó, ponla como pregunta.
 - No inventes datos (fechas, ids, enlaces, entornos): usa `_pendiente_` y pregúntalo.
-- Lenguaje llano, sin jerga técnica. Si un término técnico es imprescindible, explícalo en una frase.
-- Los comentarios de resultado no prometen lo que no se probó: distingue pruebas automáticas de pruebas manuales
-  pendientes.
+- Lenguaje llano, sin jerga técnica ni de proceso. Si un término técnico es imprescindible, explícalo en una frase.
+- Los comentarios de resultado no prometen lo que no se probó: describe lo que la persona puede comprobar y
+  lo que aún queda por probar a mano, sin hablar de pruebas automáticas ni de cobertura.
 - Reporta con fidelidad: si no pudiste verificar algo, dilo.
 
 ## Formato de tu informe final (en español)
