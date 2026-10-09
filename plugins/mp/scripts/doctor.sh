@@ -58,7 +58,9 @@ if [ -f "$CJ" ] && jq -e . "$CJ" >/dev/null 2>&1; then
   else bad "MCP taiga no registrado" "corre bootstrap/setup.sh"; fi
   if [ -n "$(val '.mcpServers.context7')" ]; then
     pass "MCP context7 registrado"
-    [ -n "$(val '.mcpServers.context7.headers.CONTEXT7_API_KEY')" ] && pass "context7: API key con valor" || bad "context7: API key vacía" "re-ejecuta bootstrap/setup.sh"
+    # formatos válidos: headers.CONTEXT7_API_KEY (setup.sh) o headers.Authorization "Bearer <key>" (ctx7 setup)
+    k=$(val '.mcpServers.context7.headers.CONTEXT7_API_KEY'); [ -n "$k" ] || k=$(val '(.mcpServers.context7.headers.Authorization // "") | sub("^Bearer +";"")')
+    [ -n "$k" ] && pass "context7: API key con valor" || bad "context7: API key vacía" "re-ejecuta bootstrap/setup.sh"
   else bad "MCP context7 no registrado" "corre bootstrap/setup.sh"; fi
   jq -e '[.mcpServers.taiga, .mcpServers.context7] | tostring | test("\$\{")' "$CJ" >/dev/null 2>&1 \
     && wrn "un MCP usa \${VAR} sin resolver" "re-ejecuta bootstrap/setup.sh"

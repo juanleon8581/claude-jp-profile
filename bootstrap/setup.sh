@@ -47,7 +47,7 @@ ask TAIGA_URL       "URL de Taiga (sin / final)" '.mcpServers.taiga.env.TAIGA_UR
 ask TAIGA_USERNAME  "Usuario de Taiga"           '.mcpServers.taiga.env.TAIGA_USERNAME'
 ask TAIGA_PASSWORD  "Contraseña de Taiga"        '.mcpServers.taiga.env.TAIGA_PASSWORD' secret
 ask TAIGA_MCP_PATH  "Ruta a taiga-mcp/dist/index.js" '.mcpServers.taiga.args[0]' "" "$HOME/local-mcp/taiga-mcp/dist/index.js"
-ask CONTEXT7_API_KEY "API key de Context7 (https://context7.com/dashboard)" '.mcpServers.context7.headers.CONTEXT7_API_KEY' secret
+ask CONTEXT7_API_KEY "API key de Context7 (https://context7.com/dashboard)" '(.mcpServers.context7.headers.CONTEXT7_API_KEY // ((.mcpServers.context7.headers.Authorization // "") | sub("^Bearer +";"")))' secret
 [ -f "$TAIGA_MCP_PATH" ] || echo "!! Aviso: $TAIGA_MCP_PATH no existe aún (git clone https://github.com/juanleon8581/taiga-mcp && npm i && npm run build)"
 
 claude mcp remove taiga --scope user >/dev/null 2>&1 || true
