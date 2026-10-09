@@ -73,8 +73,16 @@ sec "Context7 (ctx7 setup --cli)"
 
 sec "terminal-browser"
 have terminal-browser && pass "binario terminal-browser" || bad "terminal-browser no está instalado" "bootstrap/setup.sh (o curl -fsSL https://terminal-browser.sh/install | bash)"
-case "${TERM_PROGRAM:-}${TERM:-}" in *ghostty*|*kitty*) pass "terminal compatible (${TERM_PROGRAM:-$TERM})";; *) wrn "terminal no detectado como ghostty/kitty" "el plugin requiere kitty graphics protocol";; esac
-[ -n "${TMUX:-}" ] && wrn "corriendo dentro de tmux" "el plugin de Claude Code aún no funciona bajo multiplexores"
+# /browser solo es usable si `terminal-browser setup` instaló la skill del agente (symlink en $CFG/skills)
+TBS="$CFG/skills/terminal-browser"
+if [ -L "$TBS" ] && [ ! -e "$TBS" ]; then bad "skill terminal-browser rota ($TBS apunta a una ruta inexistente)" "terminal-browser setup  (tras brew upgrade/reinstalar)"
+elif [ -e "$TBS" ]; then pass "skill terminal-browser instalada"
+else bad "falta la skill terminal-browser: /browser no será usable" "terminal-browser setup  (o bootstrap/setup.sh)"; fi
+if have terminal-browser; then
+  terminal-browser --version >/dev/null 2>&1 && pass "terminal-browser responde ($(terminal-browser --version 2>/dev/null | head -1))" || bad "terminal-browser no ejecuta" "terminal-browser upgrade o reinstala"
+fi
+case "${TERM_PROGRAM:-}${TERM:-}" in *ghostty*|*kitty*) pass "terminal compatible (${TERM_PROGRAM:-$TERM})";; *) bad "terminal no compatible (${TERM_PROGRAM:-$TERM}): /browser no será usable" "usa ghostty o kitty (requiere kitty graphics protocol)";; esac
+[ -n "${TMUX:-}" ] && bad "corriendo dentro de tmux: /browser no será usable" "el plugin aún no funciona bajo multiplexores; sal de tmux"
 
 sec "Duplicados locales (el plugin ya los provee)"
 dups=0
