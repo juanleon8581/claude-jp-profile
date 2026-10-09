@@ -24,6 +24,9 @@
     "defaultMode": "auto"
   },
   "language": "español",
+  "env": {
+    "CLAUDE_CODE_ENABLE_FUNCTION_HOOKS": "1"
+  },
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline.sh"
@@ -34,7 +37,8 @@
     "skill-creator@claude-plugins-official": true,
     "context-mode@context-mode": true,
     "supabase@supabase-agent-skills": true,
-    "postgres-best-practices@supabase-agent-skills": true
+    "postgres-best-practices@supabase-agent-skills": true,
+    "terminal-browser@terminal-browser": true
   },
   "extraKnownMarketplaces": {
     "mp-marketplace": {
@@ -59,6 +63,12 @@
       "source": {
         "source": "github",
         "repo": "supabase/agent-skills"
+      }
+    },
+    "terminal-browser": {
+      "source": {
+        "source": "github",
+        "repo": "zenbu-labs/terminal-browser"
       }
     }
   },

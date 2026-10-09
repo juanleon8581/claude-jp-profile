@@ -19,6 +19,7 @@ Se instalan por fuera del plugin (desde su origen):
 - **Context7**: instalador oficial `npx ctx7 setup --cli --claude` (lo lanza `setup.sh`). Modo *CLI + Skills*: crea la API key por OAuth e instala el skill `find-docs` y la regla en `~/.claude/rules`.
 - **Supabase**: plugins oficiales `supabase` y `postgres-best-practices` del marketplace `supabase/agent-skills` (activados en `enabledPlugins`).
 - **MCP de Context7**: remoto (`https://mcp.context7.com/mcp`), a nivel usuario, con `CONTEXT7_API_KEY` del entorno; lo registra `setup.sh` igual que el de Taiga.
+- **terminal-browser**: `setup.sh` instala el binario (brew o `curl -fsSL https://terminal-browser.sh/install | bash`) si falta; el plugin y `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1` vienen en `settings.base.json`. Uso: `/browser` dentro de claude (requiere ghostty/kitty, sin tmux). Actualizar el binario: `terminal-browser upgrade`.
 - **Taiga**: MCP a nivel usuario, registrado por `setup.sh` (tools `mcp__taiga__*`).
 - **Requeridos de terceros** (desde sus marketplaces de GitHub, vía `enabledPlugins`): `context-mode@context-mode` (`mksglu/context-mode`) y `caveman@caveman` (`JuliusBrussee/caveman`). Más `skill-creator@claude-plugins-official`.
 
@@ -44,7 +45,7 @@ git clone https://github.com/juanleon8581/claude-jp-profile ~/claude-jp-profile
 
 Los MCP son **independientes del plugin**: `setup.sh` los registra a nivel usuario con los valores literales en `~/.claude.json` (permisos `600`). No hay archivo `.env` ni variables de entorno que cargar, y funcionan desde cualquier shell, `tmux` o daemon. Nada sensible vive en este repo.
 
-`setup.sh` obtiene cada valor, en este orden: (1) variables pasadas al ejecutarlo, (2) el registro que ya exista en la config de claude, (3) prompt interactivo (contraseña y key con lectura silenciosa).
+`setup.sh` es idempotente: compara contra lo ya aplicado (settings, statusline, binario, MCPs, ctx7) y solo ejecuta lo que falta o cambió; los valores ya registrados no se vuelven a preguntar (`RECONFIGURE=1` fuerza el prompt). Cada valor se obtiene, en este orden: (1) variables pasadas al ejecutarlo, (2) el registro que ya exista en la config de claude, (3) prompt interactivo (contraseña y key con lectura silenciosa).
 
 | Dato | Qué es | De dónde sale |
 | --- | --- | --- |

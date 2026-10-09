@@ -32,12 +32,13 @@ if [ -f "$SET" ] && jq -e . "$SET" >/dev/null 2>&1; then
   chk '.autoCompactWindow == 420000' "autoCompactWindow = 420000"
   chk '.permissions.allow | index("mcp__taiga")' "permiso mcp__taiga"
   chk '.permissions.ask | index("mcp__taiga__delete_task")' "ask en borrados de Taiga"
+  chk '.env.CLAUDE_CODE_ENABLE_FUNCTION_HOOKS == "1"' "env CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 (terminal-browser)"
   jq -e '.model' "$SET" >/dev/null 2>&1 && pass "model definido en este equipo ($(jq -r .model "$SET"))" || wrn "model no definido" "elígelo con /model"
 else bad "$SET ausente o inválido" "corre bootstrap/setup.sh"; fi
 
 sec "Plugins"
 IP="$CFG/plugins/installed_plugins.json"
-for p in mp@mp-marketplace caveman@caveman context-mode@context-mode skill-creator@claude-plugins-official supabase@supabase-agent-skills postgres-best-practices@supabase-agent-skills; do
+for p in mp@mp-marketplace caveman@caveman context-mode@context-mode skill-creator@claude-plugins-official supabase@supabase-agent-skills postgres-best-practices@supabase-agent-skills terminal-browser@terminal-browser; do
   if [ -f "$IP" ] && jq -e --arg p "$p" '.plugins[$p]' "$IP" >/dev/null 2>&1; then pass "$p instalado"
   elif [ -f "$SET" ] && jq -e --arg p "$p" '.enabledPlugins[$p]' "$SET" >/dev/null 2>&1; then wrn "$p habilitado pero aún no instalado" "abre claude para que lo descargue o /plugin install $p"
   else bad "$p no está instalado" "/plugin install $p"; fi
@@ -69,6 +70,11 @@ else bad "$CJ ausente o inválido" "corre bootstrap/setup.sh"; fi
 sec "Context7 (ctx7 setup --cli)"
 [ -f "$CFG/rules/context7.md" ] && pass "regla rules/context7.md" || bad "falta $CFG/rules/context7.md" "npx ctx7 setup --cli --claude"
 [ -e "$CFG/skills/find-docs" ] && pass "skill find-docs" || bad "falta skill find-docs" "npx ctx7 setup --cli --claude"
+
+sec "terminal-browser"
+have terminal-browser && pass "binario terminal-browser" || bad "terminal-browser no está instalado" "bootstrap/setup.sh (o curl -fsSL https://terminal-browser.sh/install | bash)"
+case "${TERM_PROGRAM:-}${TERM:-}" in *ghostty*|*kitty*) pass "terminal compatible (${TERM_PROGRAM:-$TERM})";; *) wrn "terminal no detectado como ghostty/kitty" "el plugin requiere kitty graphics protocol";; esac
+[ -n "${TMUX:-}" ] && wrn "corriendo dentro de tmux" "el plugin de Claude Code aún no funciona bajo multiplexores"
 
 sec "Duplicados locales (el plugin ya los provee)"
 dups=0
