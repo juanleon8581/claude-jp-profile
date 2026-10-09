@@ -1,7 +1,7 @@
 {
   "name": "mp",
   "description": "Mi perfil de Claude Code (my-profile): flujos flow/flow-auto, agentes flow-*, skills de Taiga y comandos de commit/release.",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "author": { "name": "JP León" },
   "repository": "https://github.com/juanleon8581/claude-jp-profile"
 }

@@ -7,7 +7,7 @@ Mi perfil de Claude Code como plugin privado `mp` (_my-profile_) más un marketp
 | Dónde                 | Contenido                                                                                                       |
 | --------------------- | --------------------------------------------------------------------------------------------------------------- |
 | `plugins/mp/skills`   | `flow`, `flow-auto`, `taiga-sprint-rollover`, `taiga-ticket-docs`                                               |
-| `plugins/mp/agents`   | `flow-architect`, `flow-coder`, `flow-tester`, `flow-reviewer`, `flow-documenter`                               |
+| `plugins/mp/agents`   | `flow-architect`, `flow-designer`, `flow-coder`, `flow-ui-coder`, `flow-ui-refiner`, `flow-tester`, `flow-reviewer`, `flow-documenter` |
 | `plugins/mp/commands` | `doctor`, `commit`, `commit-changes`, `commit-convention`, `changelog`, `release`, `release-pr`, `ship`                   |
 | `plugins/mp/hooks`    | Hook SessionStart que inyecta `profile-instructions.md` (regla de context7)                                     |
 | `bootstrap/`          | Lo que un plugin no puede aportar: permisos, plugins de terceros, statusline, MCP de Taiga y skills de Supabase |
@@ -23,11 +23,12 @@ Se instalan por fuera del plugin (desde su origen):
 - **MCP de shadcn**: local (`npx shadcn@latest mcp`), a nivel usuario y sin secretos; lo registra `setup.sh`. Permite explorar el registry y añadir componentes con lenguaje natural ([docs](https://ui.shadcn.com/docs/mcp)). Para listar registries propios, el proyecto necesita su `components.json`.
 - **Taiga**: MCP a nivel usuario, registrado por `setup.sh` (tools `mcp__taiga__*`).
 - **Requeridos de terceros** (desde sus marketplaces de GitHub, vía `enabledPlugins`): `context-mode@context-mode` (`mksglu/context-mode`) y `caveman@caveman` (`JuliusBrussee/caveman`). Más `skill-creator@claude-plugins-official`.
+- **Flujo de UI en `flow-auto`**: los bloques de interfaz pasan por `flow-designer` (brief, aprobado por ti una vez por change y guardado en `ui-brief.md`) → `flow-ui-coder` → `flow-ui-refiner` → tester → reviewer. Requisitos por proyecto, que `flow-auto` verifica y nunca resuelve solo: `PRODUCT.md` (`/impeccable init`), `DESIGN.md` recomendado (`/impeccable document`), `components.json` de shadcn (`npx shadcn@latest init`) y opcionalmente `/impeccable hooks on`.
 - **Diseño UI/UX**: `ui-ux-pro-max@ui-ux-pro-max-skill` (`nextlevelbuilder/ui-ux-pro-max-skill`), `impeccable@impeccable` (`pbakaus/impeccable`) y `taste-skill@taste-skill` (`Leonxlnx/taste-skill`), declarados en `enabledPlugins` e instalados por `setup.sh` (`claude plugin marketplace add` + `claude plugin install`, omite los ya instalados). Impeccable requiere además, por proyecto, correr `/impeccable init` y `/impeccable hooks on` y aprobar sus hooks (paso 2 en https://impeccable.style/#downloads).
 
 ## Instalación en un equipo nuevo
 
-Requisitos: `claude` (v1.0.33+), `jq`, `node`/`npx` (22.13+ por la statusline de caveman y context-mode), `gh`, `git`.
+Requisitos: `claude` (v1.0.33+), `jq`, `node`/`npx` (22.13+ por la statusline de caveman y context-mode), `gh`, `git`, `python3` (buscador de `ui-ux-pro-max`).
 
 ```bash
 # 1. Acceso al repo privado (HTTPS con las credenciales de gh)

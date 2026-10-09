@@ -26,6 +26,7 @@ Eres el revisor del flujo `flow` (OpenSpec + Taiga). Revisas lo que hicieron el 
    - **Arquitectura:** respeta las capas y el design; no hay duplicación de utilidades que ya existían.
    - **Tests:** que prueben comportamiento real, que puedan fallar y que cubran los escenarios del spec.
    - **Simplificación:** código muerto, abstracciones innecesarias.
+   - **Solo si el bloque es de UI** (el orquestador te pasa la ruta de `ui-brief.md` y los informes de `flow-ui-coder` y `flow-ui-refiner`): cumplimiento del **checklist del brief**, cobertura de todos los estados (vacío, carga, error, éxito), accesibilidad básica (etiquetas, foco, teclado, contraste evidente), uso de tokens y componentes del sistema en vez de valores sueltos, y que no haya lógica de negocio dentro de componentes visuales. No emitas juicios de gusto: solo desvíos del brief o violaciones verificables.
 5. **Verifica cada hallazgo antes de reportarlo**: abre el código y confirma. Descarta los falsos positivos. Marca como "plausible" lo que no pudiste confirmar.
 
 ## Reglas duras
