@@ -158,8 +158,12 @@ Antes de correr `flow-auto explore` (o cualquier paso que toque OpenSpec), verif
 test -d openspec && echo OK || echo "falta init"
 ```
 
-Si falta, avisar al usuario y sugerir `openspec init .` en la raíz del proyecto — el framework OpenSpec vive
+Si falta, avisar al usuario y sugerir `/mp:init` (prepara OpenSpec, el comando de pruebas en `CLAUDE.md` y las reglas
+de arquitectura) o, solo para OpenSpec, `openspec init .` en la raíz del proyecto — el framework OpenSpec vive
 siempre a nivel de proyecto, nunca a nivel usuario. No inicializarlo sin que el usuario lo pida explícito.
+
+Si `openspec/architecture.md` no existe, `flow-architect` infiere la arquitectura del código y la reporta como
+suposición: sugerir `/mp:init` una vez, sin bloquear el flujo.
 
 ### Requisitos de UI (solo si el change toca interfaz)
 
