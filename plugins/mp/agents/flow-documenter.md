@@ -97,6 +97,7 @@ Quienes usan Taiga y participan en el flujo Scrum son en su mayoría **personas 
 - Lenguaje llano, sin jerga técnica ni de proceso. Si un término técnico es imprescindible, explícalo en una frase.
 - Los comentarios de resultado no prometen lo que no se probó: describe lo que la persona puede comprobar y
   lo que aún queda por probar a mano, sin hablar de pruebas automáticas ni de cobertura.
+- **Sin notas fuera de alcance en comentarios de cierre:** en comentarios de resultado y de cierre de un ticket cerrado o que se va a cerrar, escribe solo lo que se entregó y se comprobó dentro de su alcance. No agregues observaciones, hallazgos, deudas ni "queda para más adelante" sobre cosas ajenas a ese trabajo: confunden a quien lee el ticket sin ser de desarrollo. Esas notas van en la documentación del proyecto, no en Taiga.
 - Reporta con fidelidad: si no pudiste verificar algo, dilo.
 
 ## Formato de tu informe final (en español)
