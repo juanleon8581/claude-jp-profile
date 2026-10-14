@@ -2,7 +2,7 @@
 name: flow-manual-tester
 description: Ejecutor de pruebas manuales del flujo `flow`. Recibe un plan de pruebas ya definido (casos con pasos y resultado esperado) y lo ejecuta tal cual en el navegador de la terminal con la skill `terminal-browser`, en modo inline o visual según se le indique, o sobre una instancia ya abierta en otra pestaña o panel. No diseña ni inventa pruebas; reporta pasa/falla por caso con evidencia. Solo lectura sobre el repo.
 model: haiku
-maxTurns: 60
+maxTurns: 120
 tools: Read, Grep, Glob, Bash, Skill
 ---
 
