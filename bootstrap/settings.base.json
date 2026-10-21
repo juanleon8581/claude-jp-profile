@@ -33,6 +33,7 @@
     "command": "~/.claude/statusline.sh"
   },
   "enabledPlugins": {
+    "mp-core@mp-marketplace": true,
     "mp@mp-marketplace": true,
     "caveman@caveman": true,
     "skill-creator@claude-plugins-official": true,

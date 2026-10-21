@@ -40,7 +40,7 @@ else bad "$SET ausente o inválido" "corre bootstrap/setup.sh"; fi
 
 sec "Plugins"
 IP="$CFG/plugins/installed_plugins.json"
-for p in mp@mp-marketplace caveman@caveman context-mode@context-mode skill-creator@claude-plugins-official supabase@supabase-agent-skills postgres-best-practices@supabase-agent-skills terminal-browser@terminal-browser ui-ux-pro-max@ui-ux-pro-max-skill impeccable@impeccable taste-skill@taste-skill; do
+for p in mp-core@mp-marketplace mp@mp-marketplace caveman@caveman context-mode@context-mode skill-creator@claude-plugins-official supabase@supabase-agent-skills postgres-best-practices@supabase-agent-skills terminal-browser@terminal-browser ui-ux-pro-max@ui-ux-pro-max-skill impeccable@impeccable taste-skill@taste-skill; do
   if [ -f "$IP" ] && jq -e --arg p "$p" '.plugins[$p]' "$IP" >/dev/null 2>&1; then pass "$p instalado"
   elif [ -f "$SET" ] && jq -e --arg p "$p" '.enabledPlugins[$p]' "$SET" >/dev/null 2>&1; then wrn "$p habilitado pero aún no instalado" "abre claude para que lo descargue o /plugin install $p"
   else bad "$p no está instalado" "/plugin install $p"; fi

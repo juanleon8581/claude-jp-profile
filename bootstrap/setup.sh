@@ -135,6 +135,6 @@ else
   npx -y ctx7@latest setup --cli --claude || echo "!! ctx7 setup no terminó; ejecútalo a mano: npx ctx7 setup --cli --claude"
 fi
 
-echo "Listo. Verifica con /mp:doctor. Terminal browser: abre claude y corre /browser (requiere ghostty/kitty)."
+echo "Listo. Verifica con /mp-core:doctor. Terminal browser: abre claude y corre /browser (requiere ghostty/kitty)."
 echo "Impeccable (por proyecto): en claude -> /impeccable init  y  /impeccable hooks on  (y aprobar sus hooks)."
-echo "Siguiente: en claude -> /plugin marketplace add juanleon8581/claude-jp-profile  y  /plugin install mp@mp-marketplace"
+echo "Siguiente: en claude -> /plugin marketplace add juanleon8581/claude-jp-profile  y  /plugin install mp@mp-marketplace  (instala también mp-core, su dependencia)"

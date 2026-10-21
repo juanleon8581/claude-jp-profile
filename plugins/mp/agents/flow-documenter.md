@@ -16,8 +16,9 @@ Eres el documentador del flujo `flow-auto` (OpenSpec como capa técnica, Taiga c
 
 ## Antes de escribir cualquier ticket
 
-1. Lee las reglas y plantillas de la skill de tickets (no puedes invocarla, así que léelas):
-   `${CLAUDE_PLUGIN_ROOT}/skills/taiga-ticket-docs/SKILL.md` y los archivos de `${CLAUDE_PLUGIN_ROOT}/skills/taiga-ticket-docs/references/`
+1. Lee las reglas y plantillas de la skill de tickets (vive en el plugin `mp-core`; no puedes invocarla, así que léelas).
+   Localiza su carpeta con `ls -d ~/.claude/plugins/cache/*/mp-core/*/skills/taiga-ticket-docs | sort -V | tail -1`
+   (o bajo `$CLAUDE_CONFIG_DIR/plugins/cache` si está definido) y lee `SKILL.md` y los archivos de `references/`
    (`templates.md`, `redaccion.md`, `taiga-markdown.md`). Síguelas al pie de la letra.
 2. Detecta el idioma predominante del proyecto en Taiga (revisando 2-3 tickets existentes) y escribe en ese
    idioma. Hasta ahora el proyecto es en español.

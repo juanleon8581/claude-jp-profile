@@ -1,18 +1,21 @@
 # claude-jp-profile
 
-Mi perfil de Claude Code como plugin privado `mp` (_my-profile_) más un marketplace de un solo plugin (`mp-marketplace`).
+Mis perfiles de Claude Code como plugins privados (`mp` = _my-profile_) dentro de un marketplace (`mp-marketplace`). Lo común vive en `mp-core`; cada perfil lo declara como dependencia (`"dependencies": ["mp-core"]` en su `plugin.json`).
 
 ## Qué incluye
 
-| Dónde                 | Contenido                                                                                                       |
-| --------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `plugins/mp/skills`   | `flow`, `flow-auto`, `flow-architecture`, `taiga-sprint-rollover`, `taiga-ticket-docs`                          |
-| `plugins/mp/agents`   | `flow-architect`, `flow-designer`, `flow-coder`, `flow-ui-coder`, `flow-ui-refiner`, `flow-tester`, `flow-reviewer`, `flow-documenter` |
-| `plugins/mp/commands` | `doctor`, `init`, `promote`, `commit`, `commit-changes`, `commit-convention`, `changelog`, `release`, `release-pr`, `ship`                   |
-| `plugins/mp/hooks`    | Hook SessionStart que inyecta `profile-instructions.md` (regla de context7)                                     |
-| `bootstrap/`          | Lo que un plugin no puede aportar: permisos, plugins de terceros, statusline, MCP de Taiga y skills de Supabase |
+| Dónde                         | Contenido                                                                                                       |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `plugins/mp-core/commands`    | `doctor`, `promote`, `commit`, `commit-changes`, `commit-convention`, `changelog`, `release`, `release-pr`, `ship` |
+| `plugins/mp-core/skills`      | `taiga-sprint-rollover`, `taiga-ticket-docs`                                                                    |
+| `plugins/mp-core/hooks`       | Hook PreToolUse que bloquea commits firmados por Claude                                                         |
+| `plugins/mp/skills`           | `flow`, `flow-auto`, `flow-architecture`                                                                        |
+| `plugins/mp/agents`           | `flow-architect`, `flow-designer`, `flow-coder`, `flow-ui-coder`, `flow-ui-refiner`, `flow-tester`, `flow-reviewer`, `flow-documenter`, `flow-manual-tester` |
+| `plugins/mp/commands`         | `init`                                                                                                          |
+| `bootstrap/`                  | Lo que un plugin no puede aportar: permisos, plugins de terceros, statusline, MCP de Taiga y skills de Supabase |
+| `bootstrap/validate-plugins.sh` | Valida manifiestos, dependencias y rutas internas de cada plugin (correr antes de cada release)              |
 
-Nombres con namespace: `/mp:flow-auto`, `/mp:commit`, agentes `mp:flow-coder`, etc.
+Nombres con namespace: `/mp:flow-auto`, `/mp:init`, agentes `mp:flow-coder`; y del núcleo `/mp-core:commit`, `/mp-core:release`, `/mp-core:doctor`, `/mp-core:promote`.
 
 Se instalan por fuera del plugin (desde su origen):
 
@@ -24,7 +27,7 @@ Se instalan por fuera del plugin (desde su origen):
 - **Taiga**: MCP a nivel usuario, registrado por `setup.sh` (tools `mcp__taiga__*`).
 - **Requeridos de terceros** (desde sus marketplaces de GitHub, vía `enabledPlugins`): `context-mode@context-mode` (`mksglu/context-mode`) y `caveman@caveman` (`JuliusBrussee/caveman`). Más `skill-creator@claude-plugins-official`.
 - **Flujo de UI en `flow-auto`**: los bloques de interfaz pasan por `flow-designer` (brief, aprobado por ti una vez por change y guardado en `ui-brief.md`) → `flow-ui-coder` → `flow-ui-refiner` → tester → reviewer. Requisitos por proyecto, que `flow-auto` verifica y nunca resuelve solo: `PRODUCT.md` (`/impeccable init`), `DESIGN.md` recomendado (`/impeccable document`), `components.json` de shadcn (`npx shadcn@latest init`) y opcionalmente `/impeccable hooks on`.
-- **Promover cambios hechos en caliente**: `/mp:promote` compara la copia instalada del plugin (`~/.claude/plugins/cache/...`) contra la versión base y contra `origin/main` con `scripts/promote.sh`, te deja elegir archivo por archivo (marca `CONFLICTO` si `main` también cambió ese archivo) y abre un **Pull Request** desde un worktree temporal (con fork si no tienes permiso de escritura). Nunca hace push a `main` ni sube la versión: tras el merge, `/mp:release` versiona y cada equipo recibe el cambio con `/plugin marketplace update mp-marketplace`.
+- **Promover cambios hechos en caliente**: `/mp-core:promote` compara la copia instalada del plugin (`~/.claude/plugins/cache/...`) contra la versión base y contra `origin/main` con `plugins/mp-core/scripts/promote.sh`, te deja elegir archivo por archivo (marca `CONFLICTO` si `main` también cambió ese archivo) y abre un **Pull Request** desde un worktree temporal (con fork si no tienes permiso de escritura). Nunca hace push a `main` ni sube la versión: tras el merge, `/mp-core:release` versiona y cada equipo recibe el cambio con `/plugin marketplace update mp-marketplace`.
 - **Preparar un proyecto para el flow**: `/mp:init` (en la raíz del proyecto) diagnostica con `scripts/project-check.sh` y, con tu aprobación, completa lo que falte: OpenSpec (`openspec init`), `CLAUDE.md` con los comandos de prueba/build/formato, `openspec/architecture.md` (capas, dependencias y excepciones que usa `flow-architect`) y la referencia a ese archivo en `openspec/config.yaml`. Es idempotente, no sobrescribe y no hace commit. Los requisitos de UI (`PRODUCT.md`, `DESIGN.md`, `components.json`) solo se reportan.
 - **Arquitecto**: `flow-architect` carga por su cuenta la skill `flow-architecture` (Clean Architecture como lente por defecto, dominio, seguridad y datos como referencias que elige según el change). Manda siempre lo que el proyecto declare en `openspec/architecture.md`; sin ese archivo infiere del código y lo marca como suposición. La skill destila `clean-architecture` y `domain-driven-design` (wondelai, MIT) y `security-threat-model` (OpenAI, Apache-2.0).
 - **Diseño UI/UX**: `ui-ux-pro-max@ui-ux-pro-max-skill` (`nextlevelbuilder/ui-ux-pro-max-skill`), `impeccable@impeccable` (`pbakaus/impeccable`) y `taste-skill@taste-skill` (`Leonxlnx/taste-skill`), declarados en `enabledPlugins` e instalados por `setup.sh` (`claude plugin marketplace add` + `claude plugin install`, omite los ya instalados). Impeccable requiere además, por proyecto, correr `/impeccable init` y `/impeccable hooks on` y aprobar sus hooks (paso 2 en https://impeccable.style/#downloads).
@@ -44,7 +47,7 @@ git clone https://github.com/juanleon8581/claude-jp-profile ~/claude-jp-profile
 # 3. Dentro de claude
 /plugin marketplace add juanleon8581/claude-jp-profile
 /plugin install mp@mp-marketplace
-/mp:doctor
+/mp-core:doctor
 ```
 
 ## Datos de los MCP (Taiga y Context7)
@@ -82,13 +85,13 @@ Otros datos por equipo:
 - **Context7**: `setup.sh` ejecuta `npx ctx7 setup --cli --claude`. Muestra un link y un código (device flow): ábrelo en cualquier navegador e inicia sesión. La key queda gestionada por ctx7; se administra en https://context7.com/dashboard. Para saltarlo: `SKIP_CTX7=1 ./bootstrap/setup.sh`.
 - **Plugins de terceros**: se descargan solos al abrir claude la primera vez (confirma la instalación si lo pide).
 
-Verificación: `/mp:doctor` revisa requisitos, settings, MCPs (que estén registrados y con valores, sin imprimirlos), plugins recomendados, duplicados locales y el hook anti-firma. También sirve fuera de claude: `bash plugins/mp/scripts/doctor.sh` (exit 1 si hay errores).
+Verificación: `/mp-core:doctor` revisa requisitos, settings, MCPs (que estén registrados y con valores, sin imprimirlos), plugins recomendados, duplicados locales y el hook anti-firma. También sirve fuera de claude: `bash plugins/mp-core/scripts/doctor.sh` (exit 1 si hay errores).
 
 ## Flujo de actualización
 
-1. Editar en `plugins/mp/` (o `bootstrap/`).
-2. Subir `version` en `plugins/mp/.claude-plugin/plugin.json`, commit y push.
-3. En cada equipo: `/plugin marketplace update mp-marketplace` y `/plugin update mp`.
+1. Editar en `plugins/<plugin>/` (o `bootstrap/`) y correr `bash bootstrap/validate-plugins.sh`.
+2. Subir `version` en `plugins/<plugin>/.claude-plugin/plugin.json` del plugin que cambió, commit y push.
+3. En cada equipo: `/plugin marketplace update mp-marketplace` y `/plugin update <plugin>`.
 4. Si cambió algo en `bootstrap/` (permisos, MCP, plugins de terceros): volver a correr `bootstrap/setup.sh`.
 
 ## Notas

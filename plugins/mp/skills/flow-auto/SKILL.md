@@ -626,7 +626,7 @@ artefactos listos / bloque aprobado / release / chequeo entre fases>.
 Defaults de Taiga del change (de taiga-sync.json): <milestoneId, assignedTo, customAttributes>.
 Contexto: <qué se decidió, qué bloque, qué estado pidió el usuario>.
 [apply: payload aprobado por el usuario, textual e inalterable: <pegar>]
-Lee las reglas de ${CLAUDE_PLUGIN_ROOT}/skills/taiga-ticket-docs/. En draft y audit NO llames herramientas de Taiga que
+Lee las reglas de la skill taiga-ticket-docs (plugin mp-core; el agente las localiza solo). En draft y audit NO llames herramientas de Taiga que
 escriban. En apply ejecuta solo el payload aprobado y verifica releyendo. Nunca Done, nunca borres.
 ```
 

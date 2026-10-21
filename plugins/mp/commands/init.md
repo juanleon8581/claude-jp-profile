@@ -5,7 +5,7 @@ allowed-tools: Bash(bash:*), Bash(openspec:*), Read, Write, Edit, Glob, Grep
 
 # /mp:init
 
-Prepara el **proyecto activo** (no el entorno de usuario; eso es `/mp:doctor`) con lo que `flow` y `flow-auto` necesitan. Es idempotente: solo completa lo que falta y **nunca sobrescribe** contenido existente. No hace commit y no toca Taiga.
+Prepara el **proyecto activo** (no el entorno de usuario; eso es `/mp-core:doctor`) con lo que `flow` y `flow-auto` necesitan. Es idempotente: solo completa lo que falta y **nunca sobrescribe** contenido existente. No hace commit y no toca Taiga.
 
 ## 1. Diagnóstico
 
