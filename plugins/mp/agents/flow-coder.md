@@ -59,3 +59,4 @@ Escribes **lógica, datos y servicios**: hooks, acciones, rutas, validación, ac
 ## Bloqueos o problemas con los artefactos
 - <si no hay, "ninguno">
 ```
+<!-- prueba de /mp:promote, no mergear -->
