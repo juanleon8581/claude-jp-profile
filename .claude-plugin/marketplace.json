@@ -4,7 +4,8 @@
     "name": "JP León"
   },
   "metadata": {
-    "description": "Marketplace privado con mis perfiles de Claude Code (mp = my-profile)."
+    "description": "Marketplace privado con mis perfiles de Claude Code (mp = my-profile).",
+    "version": "2.0.0"
   },
   "plugins": [
     {

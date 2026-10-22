@@ -27,6 +27,7 @@ for name in $names; do
   [ "$(jq -r .name "$pj")" = "$name" ] && pass "plugin.json name = $name" || bad "plugin.json name no coincide con el marketplace"
   ver=$(jq -r '.version // empty' "$pj")
   echo "$ver" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$' && pass "versión $ver" || bad "versión inválida (${ver:-vacía})"
+  [ -f "$dir/CHANGELOG.md" ] && grep -qF "## [$ver]" "$dir/CHANGELOG.md" && pass "CHANGELOG.md tiene la sección [$ver]" || bad "falta plugins/$name/CHANGELOG.md con la sección [$ver]" "/mp-core:marketplace-release"
 
   # dependencias: deben existir en este marketplace y no ser él mismo
   for dep in $(jq -r '.dependencies[]? | if type=="string" then . else .name end' "$pj"); do
@@ -117,6 +118,21 @@ if [ -f "$DOC" ] && [ -f "$SETUP" ] && [ -f "$SB" ]; then
   [ -n "$s_emil" ] && [ "$s_emil" = "$d_emil" ] || { bad "la lista EMIL_SKILLS de setup.sh y la del doctor difieren"; cons=1; }
   [ "$cons" -eq 0 ] && pass "setup, settings y doctor cubren los mismos plugins y skills"
 else echo "  (bootstrap incompleto, se omite)"; fi
+
+sec "Versionado del repo"
+rv=$(jq -r '.metadata.version // empty' "$MJ")
+echo "$rv" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$' && pass "metadata.version $rv" || bad "marketplace.json sin metadata.version SemVer (${rv:-vacía})"
+[ -f "$ROOT/CHANGELOG.md" ] && grep -qF "## [$rv]" "$ROOT/CHANGELOG.md" && pass "CHANGELOG.md raíz tiene la sección [$rv]" || bad "falta CHANGELOG.md raíz con la sección [$rv]"
+# la entrada del repo debe listar la versión vigente de cada plugin
+if [ -f "$ROOT/CHANGELOG.md" ]; then
+  sect=$(awk -v h="## [$rv]" 'index($0,h)==1{f=1;next} /^## \[/{f=0} f' "$ROOT/CHANGELOG.md")
+  tab=0
+  for name in $names; do
+    v=$(jq -r .version "$ROOT/plugins/$name/.claude-plugin/plugin.json" 2>/dev/null)
+    echo "$sect" | grep -E "\[?$name\]?(\([^)]*\))? *\| *$v " >/dev/null || { bad "la entrada [$rv] del CHANGELOG raíz no lista $name $v"; tab=1; }
+  done
+  [ "$tab" -eq 0 ] && pass "la tabla de [$rv] coincide con las versiones de los plugins"
+fi
 
 sec "claude plugin validate"
 if command -v claude >/dev/null 2>&1; then
