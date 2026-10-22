@@ -3,7 +3,7 @@ name: flow-auto
 description: >-
   Versión multiagente de `flow`. Orquesta el mismo flujo estandarizado (Spec-Driven Development vía OpenSpec
   envuelto en Taiga como capa de Scrum/negocio) pero delega el trabajo de la fase de desarrollo a agentes
-  especializados (flow-architect, flow-designer, flow-coder, flow-ui-coder, flow-ui-refiner, flow-tester,
+  especializados (flow-architect, ui-designer, flow-coder, ui-coder, ui-refiner, flow-tester,
   flow-reviewer) en ciclos por bloque de tasks.md, y
   delega la documentación de Taiga en flow-documenter, deteniéndose siempre en los gates manuales. Activar cuando el usuario escriba "/flow-auto", pida ejecutar un
   bloque del change con agentes, o pida el modo multiagente del flow. Subcomandos: start, explore, review, sync,
@@ -38,16 +38,16 @@ changes con interfaz, `openspec/changes/<change-id>/ui-brief.md` (ver "Brief de 
 
 ### Roster
 
-Los agentes viven en `${CLAUDE_PLUGIN_ROOT}/agents/` y se invocan con la tool `Agent` (`subagent_type`):
-(Al venir del plugin `mp`, el `subagent_type` lleva prefijo: `mp:flow-coder`, etc.)
+Los agentes se invocan con la tool `Agent` (`subagent_type`). Los `flow-*` viven en `${CLAUDE_PLUGIN_ROOT}/agents/` y llevan el prefijo del plugin (`mp:flow-coder`, etc.).
+Los tres de UI (`ui-designer`, `ui-coder`, `ui-refiner`) son **compartidos con el flujo `lp`** y viven en el plugin `mp-core`: su prefijo es `mp-core:` (`mp-core:ui-coder`). Aquí se usan en su modo por defecto (OpenSpec, sin perfil).
 
 | Agente | Rol | Escribe | Modelo |
 |---|---|---|---|
 | `flow-architect` | Explore y revisión de artefactos, **solo lo técnico**: cruza proposal/specs/design/tasks con el código real | nada (solo lectura) | opus |
-| `flow-designer` | Dirección UX/UI del change: sistema de diseño, componentes shadcn, estados, responsive, accesibilidad. Devuelve el brief | nada (el orquestador guarda `ui-brief.md`) | sonnet |
+| `ui-designer` | Dirección UX/UI del change: sistema de diseño, componentes shadcn, estados, responsive, accesibilidad. Devuelve el brief | nada (el orquestador guarda `ui-brief.md`) | sonnet |
 | `flow-coder` | Implementa **un bloque** de `tasks.md`: lógica, datos y servicios (no interfaz) | código no-UI | sonnet |
-| `flow-ui-coder` | Construye la **interfaz** de un bloque siguiendo `ui-brief.md` (componentes shadcn vía MCP) | código de UI | sonnet |
-| `flow-ui-refiner` | Audita y pule la UI ya construida (a11y, jerarquía, responsive, estados) sin cambiar comportamiento ni dirección visual | correcciones de UI | sonnet |
+| `ui-coder` | Construye la **interfaz** de un bloque siguiendo `ui-brief.md` (componentes shadcn vía MCP) | código de UI | sonnet |
+| `ui-refiner` | Audita y pule la UI ya construida (a11y, jerarquía, responsive, estados) sin cambiar comportamiento ni dirección visual | correcciones de UI | sonnet |
 | `flow-tester` | Escribe y corre tests, `compile` y formato; reporta qué probar a mano | tests | sonnet |
 | `flow-reviewer` | Revisa el `git diff` contra specs y design; reporta hallazgos | nada (solo lectura) | opus |
 | `flow-documenter` | Documenta en Taiga y mantiene Taiga sincronizado con el proyecto local (modos `draft` / `apply` / `audit`) | Taiga, solo con un payload aprobado | sonnet |
@@ -74,8 +74,8 @@ Los agentes viven en `${CLAUDE_PLUGIN_ROOT}/agents/` y se invocan con la tool `A
 | Recurso | Quién | Condición |
 |---|---|---|
 | Código de producción (lógica, datos) | `flow-coder` | dentro de un bloque |
-| Código de UI | `flow-ui-coder` (construye) y `flow-ui-refiner` (solo correcciones) | dentro de un bloque; requiere `ui-brief.md` aprobado |
-| `ui-brief.md` | orquestador | a partir del informe de `flow-designer`; solo se guarda tras la aprobación del usuario |
+| Código de UI | `ui-coder` (construye) y `ui-refiner` (solo correcciones) | dentro de un bloque; requiere `ui-brief.md` aprobado |
+| `ui-brief.md` | orquestador | a partir del informe de `ui-designer`; solo se guarda tras la aprobación del usuario |
 | Tests | `flow-tester` | dentro de un bloque |
 | Checkboxes de `tasks.md` | orquestador | solo tras verificar el bloque (excepción única) |
 | Resto de artefactos OpenSpec | solo `openspec-explore` | nunca agentes ni el orquestador directo |
@@ -180,7 +180,7 @@ python3 --version || echo "falta python3"
 |---|---|---|
 | `PRODUCT.md` (impeccable) | Contexto de producto que `impeccable` exige antes de diseñar o construir UI | **Bloquea** los agentes de UI. Pedir al usuario `/impeccable init` (entrevista interactiva: la hace la sesión principal con el usuario, nunca un agente) |
 | `DESIGN.md` (impeccable) | Sistema visual vigente del proyecto | No bloquea. Si ya hay UI existente, sugerir `/impeccable document`; si es un proyecto nuevo, lo crea el flujo de diseño de impeccable al definir el mundo visual |
-| `python3` | El buscador de `ui-ux-pro-max` (solo biblioteca estándar) | **Bloquea** al `flow-designer`: avisar para que lo instale el usuario; los agentes no instalan software |
+| `python3` | El buscador de `ui-ux-pro-max` (solo biblioteca estándar) | **Bloquea** al `ui-designer`: avisar para que lo instale el usuario; los agentes no instalan software |
 | `components.json` (shadcn) | El MCP y la CLI de shadcn lo necesitan para añadir componentes | Sugerir `npx shadcn@latest init`; no ejecutarlo sin orden |
 | Hooks de impeccable (`/impeccable hooks on`) | Chequeos automáticos de diseño mientras se edita | Opcional; recomendarlo una vez, nunca bloquea |
 
@@ -223,7 +223,7 @@ negocio y técnicos. No se invocan directamente `opsx:new`, `opsx:propose`, `ops
 nuestra skill — eso es responsabilidad interna de `opsx:explore`.
 
 **Aporte de agentes en esta fase:** durante la exploración se puede consultar a `flow-architect` (tool `Agent`)
-para investigar el código real, cruzar artefactos o evaluar una decisión técnica, y a `flow-designer` cuando el
+para investigar el código real, cruzar artefactos o evaluar una decisión técnica, y a `ui-designer` cuando el
 change tenga interfaz y haya que aclarar decisiones de UX/UI (estados, flujos, componentes). La conversación con el usuario y
 la creación/modificación de artefactos **siguen en la sesión principal vía `openspec-explore`**. El informe del
 architect se resume al usuario; sus "preguntas de negocio" se le plantean al usuario, nunca se resuelven solas.
@@ -245,7 +245,7 @@ presenta al usuario (ver "Documentación en Taiga"). Al terminar explore corre e
 **Aporte de agentes:** al correr `flow-auto review`, **antes** de entregar el checklist de lectura, se lanza
 `flow-architect` para revisar los artefactos del change (contradicciones, casos borde, dependencias no declaradas,
 tareas sin criterio de aceptación o de más de 2 horas, riesgos con datos externos). Sus hallazgos se resumen junto
-al checklist, separados en técnicos y de negocio. Si el change tiene interfaz, también se lanza `flow-designer` para
+al checklist, separados en técnicos y de negocio. Si el change tiene interfaz, también se lanza `ui-designer` para
 revisar que specs y tasks de UI cubran estados (vacío/carga/error), responsive y accesibilidad; sus hallazgos van en
 una sección propia. Es informativo: no aprueba ni bloquea por sí mismo.
 
@@ -325,17 +325,17 @@ Al elegir el bloque, el orquestador lo clasifica a partir de las rutas y el text
 3. **Resolver bloqueos de negocio antes de delegar.** Si el bloque depende de una definición que los artefactos
    no cierran (p. ej. un texto, una regla), preguntársela al usuario **antes** de lanzar agentes.
 4. **Clasificar y preparar la UI.** Fijar el tipo del bloque. Si es `ui` o `mixed`: verificar los requisitos de UI
-   de la Fase 0; si no hay `ui-brief.md` aprobado, correr `flow-designer`, mostrar el brief **completo** al usuario y
+   de la Fase 0; si no hay `ui-brief.md` aprobado, correr `ui-designer`, mostrar el brief **completo** al usuario y
    **parar** hasta su aprobación (gate manual, ver "Brief de diseño").
 5. **Coder** (`logic` y `mixed`). `Agent(subagent_type: "mp:flow-coder")` con el contrato del coder.
-6. **UI** (`ui` y `mixed`). `Agent(subagent_type: "mp:flow-ui-coder")` y luego
-   `Agent(subagent_type: "mp:flow-ui-refiner")` con el informe del ui-coder y el brief.
+6. **UI** (`ui` y `mixed`). `Agent(subagent_type: "mp-core:ui-coder")` y luego
+   `Agent(subagent_type: "mp-core:ui-refiner")` con el informe del ui-coder y el brief.
 7. **Tester.** `Agent(subagent_type: "mp:flow-tester")` con los informes de coder y/o ui-coder y ui-refiner.
 8. **Reviewer.** `Agent(subagent_type: "mp:flow-reviewer")` con todos los informes anteriores (y el brief si es UI).
 9. **Evaluar y, si corresponde, corregir.** Hay ronda de corrección si el tester reporta fallos o bugs en el
    código, o el reviewer da `REQUIERE CORRECCIONES` con hallazgos de severidad alta o media **confirmados**. La
-   ronda enruta cada hallazgo a su dueño — lógica → `flow-coder`, interfaz → `flow-ui-coder` (y
-   `flow-ui-refiner` si el hallazgo es de calidad de UI) — con la lista exacta de hallazgos, y luego se repite
+   ronda enruta cada hallazgo a su dueño — lógica → `flow-coder`, interfaz → `ui-coder` (y
+   `ui-refiner` si el hallazgo es de calidad de UI) — con la lista exacta de hallazgos, y luego se repite
    `flow-tester` → `flow-reviewer`. **Máximo 2 rondas de corrección.** Los hallazgos "plausibles" o de severidad baja no disparan ronda: se reportan tal
    cual. Si tras las rondas quedan hallazgos abiertos, se informan sin esconderlos ni maquillarlos.
 10. **Verificación propia del orquestador.** Correr los comandos de test y compilación documentados en el
@@ -397,12 +397,12 @@ Se ejecuta **solo cuando el usuario aprueba el bloque** y **solo las acciones qu
 
 #### Brief de diseño (`ui-brief.md`)
 
-- Lo produce `flow-designer` (solo lectura); **el orquestador** lo guarda en
+- Lo produce `ui-designer` (solo lectura); **el orquestador** lo guarda en
   `openspec/changes/<change-id>/ui-brief.md` **solo después de que el usuario lo apruebe**. Es contexto compartido por
-  archivo para `flow-ui-coder`, `flow-ui-refiner` y `flow-reviewer`.
+  archivo para `ui-coder`, `ui-refiner` y `flow-reviewer`.
 - **Gate manual, una vez por change:** se muestra el brief completo y se registra `flow.gates.uiBriefApproved`. Los
   bloques UI siguientes lo reutilizan.
-- Si un bloque posterior exige cambiar la dirección, `flow-designer` propone un **delta** y se pide aprobación otra
+- Si un bloque posterior exige cambiar la dirección, `ui-designer` propone un **delta** y se pide aprobación otra
   vez antes de editar `ui-brief.md`.
 - Prioridad ante conflicto: pedido del usuario > `ui-brief.md` aprobado > `PRODUCT.md` / `DESIGN.md` > skills.
 
@@ -566,7 +566,7 @@ Devuelve tu informe en el formato definido en tu prompt.
 [Ronda de corrección: corrige exactamente estos hallazgos: <lista con archivo:línea y regla afectada>]
 ```
 
-**flow-designer**
+**ui-designer**
 ```
 Change: <change-id> (openspec/changes/<change-id>/). Alcance de UI: <bloques / pantallas>. [Delta sobre ui-brief.md
 aprobado: <qué cambia y por qué>].
@@ -575,7 +575,7 @@ Decisiones del usuario ya tomadas (respétalas): <lista>.
 Solo lectura. Devuelve el brief en el formato de tu prompt; no escribas archivos. Los gaps de negocio, como preguntas.
 ```
 
-**flow-ui-coder**
+**ui-coder**
 ```
 Change: <change-id>. Bloque: <N> — <nombre del grupo>, tareas <N.1 a N.k>. Brief aprobado:
 openspec/changes/<change-id>/ui-brief.md. [Informe del coder (lógica lista para consumir): <pegar>].
@@ -587,7 +587,7 @@ Devuelve tu informe en el formato definido en tu prompt.
 [Ronda de corrección: corrige exactamente estos hallazgos: <lista con archivo:línea y punto del brief afectado>]
 ```
 
-**flow-ui-refiner**
+**ui-refiner**
 ```
 Change: <change-id>. Bloque: <N>. Brief: openspec/changes/<change-id>/ui-brief.md. Informe del ui-coder: <pegar>.
 Audita la UI del bloque contra el checklist del brief y corrige solo desvíos del brief, del piso de calidad y de
@@ -664,8 +664,8 @@ escriban. En apply ejecuta solo el payload aprobado y verifica releyendo. Nunca 
 
 ## Herramientas
 
-- Agentes: tool `Agent` con `subagent_type` `flow-architect`, `flow-designer`, `flow-coder`, `flow-ui-coder`,
-  `flow-ui-refiner`, `flow-tester`, `flow-reviewer`, `flow-documenter`.
+- Agentes: tool `Agent` con `subagent_type` `flow-architect`, `ui-designer`, `flow-coder`, `ui-coder`,
+  `ui-refiner`, `flow-tester`, `flow-reviewer`, `flow-documenter`.
 - Diseño: skills `impeccable`, `ui-ux-pro-max` y `taste-skill` (las usan los agentes de UI) y MCP `shadcn`.
 - Taiga: `mcp__taiga__*`, usado a través de `flow-documenter` (el orquestador solo lee para verificar), con las
   reglas de la skill `taiga-ticket-docs`.

@@ -10,7 +10,7 @@ Eres el arquitecto del flujo `flow` (OpenSpec como capa técnica, Taiga como cap
 
 ## Alcance
 
-Tu campo es **técnico**: capas, contratos, datos, seguridad, concurrencia y casos borde de lógica. La dirección visual, los componentes de interfaz, los estados de UI y la accesibilidad son de `flow-designer`: si detectas un hueco ahí, anótalo en "Preguntas de negocio" o "No verificado" indicando que es de diseño, sin opinar sobre estilo.
+Tu campo es **técnico**: capas, contratos, datos, seguridad, concurrencia y casos borde de lógica. La dirección visual, los componentes de interfaz, los estados de UI y la accesibilidad son de `ui-designer`: si detectas un hueco ahí, anótalo en "Preguntas de negocio" o "No verificado" indicando que es de diseño, sin opinar sobre estilo.
 
 ## Criterios arquitectónicos
 
