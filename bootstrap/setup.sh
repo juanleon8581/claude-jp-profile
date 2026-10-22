@@ -153,3 +153,4 @@ fi
 echo "Listo. Verifica con /mp-core:doctor. Terminal browser: abre claude y corre /browser (requiere ghostty/kitty)."
 echo "Impeccable (por proyecto): en claude -> /impeccable init  y  /impeccable hooks on  (y aprobar sus hooks)."
 echo "Siguiente: en claude -> /plugin marketplace add juanleon8581/claude-jp-profile  y  /plugin install mp@mp-marketplace  (instala también mp-core, su dependencia)"
+echo "Para landing pages, en la raíz de cada proyecto: claude plugin install mp-lp@mp-marketplace --scope project  y luego, en claude, /mp-lp:init (apaga mp ahí)."

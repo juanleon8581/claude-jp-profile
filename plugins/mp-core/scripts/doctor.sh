@@ -11,6 +11,7 @@ pass(){ echo "  ${G}✔${N} $1"; ok=$((ok+1)); }
 wrn(){ echo "  ${Y}⚠${N} $1${2:+ ${D}→ $2${N}}"; warn=$((warn+1)); }
 bad(){ echo "  ${R}✖${N} $1${2:+ ${D}→ $2${N}}"; fail=$((fail+1)); }
 sec(){ echo; echo "$1"; }
+info(){ echo "  ${D}·${N} $1"; }
 have(){ command -v "$1" >/dev/null 2>&1; }
 
 sec "Requisitos"
@@ -45,6 +46,20 @@ for p in mp-core@mp-marketplace mp@mp-marketplace caveman@caveman context-mode@c
   elif [ -f "$SET" ] && jq -e --arg p "$p" '.enabledPlugins[$p]' "$SET" >/dev/null 2>&1; then wrn "$p habilitado pero aún no instalado" "abre claude para que lo descargue o /plugin install $p"
   else bad "$p no está instalado" "/plugin install $p"; fi
 done
+
+sec "Perfil de landing (mp-lp, opcional; se instala por proyecto)"
+if [ -f "$IP" ] && jq -e '.plugins["mp-lp@mp-marketplace"]' "$IP" >/dev/null 2>&1; then
+  pass "mp-lp@mp-marketplace instalado"
+  # mp-lp depende de mp-core: sin él los agentes de UI compartidos no existen
+  jq -e '.plugins["mp-core@mp-marketplace"]' "$IP" >/dev/null 2>&1 && pass "dependencia mp-core presente" || bad "mp-lp instalado pero falta su dependencia mp-core" "/plugin install mp-core@mp-marketplace"
+  chrome=""
+  for c in google-chrome chromium chromium-browser chrome; do have "$c" && { chrome="$c"; break; }; done
+  [ -z "$chrome" ] && [ -d "/Applications/Google Chrome.app" ] && chrome="Google Chrome.app"
+  [ -n "$chrome" ] && pass "Chrome/Chromium ($chrome), lo usa Lighthouse (measure.sh)" || wrn "no hay Chrome ni Chromium" "mp-lp lo necesita para medir rendimiento con Lighthouse"
+  have ffmpeg && pass "ffmpeg (video)" || info "ffmpeg no está instalado; solo lo necesita lp-media si hay video"
+else
+  info "mp-lp no está instalado; en un proyecto de landing: claude plugin install mp-lp@mp-marketplace --scope project y luego /mp-lp:init"
+fi
 
 sec "MCPs (nivel usuario, $CJ)"
 if [ -f "$CJ" ] && jq -e . "$CJ" >/dev/null 2>&1; then
@@ -97,9 +112,9 @@ case "${TERM_PROGRAM:-}${TERM:-}" in *ghostty*|*kitty*) pass "terminal compatibl
 
 sec "Duplicados locales (el plugin ya los provee)"
 dups=0
-for s in flow flow-auto taiga-sprint-rollover taiga-ticket-docs; do [ -e "$CFG/skills/$s" ] && { wrn "skill local duplicado: $s" "bórralo de $CFG/skills"; dups=1; }; done
-for a in "$CFG"/agents/flow-*.md; do [ -e "$a" ] && { wrn "agente local duplicado: $(basename "$a")" "bórralo de $CFG/agents"; dups=1; }; done
-for c in changelog commit commit-changes commit-convention release release-pr ship; do [ -e "$CFG/commands/$c.md" ] && { wrn "comando local duplicado: $c" "bórralo de $CFG/commands"; dups=1; }; done
+for s in flow flow-auto flow-architecture lp lp-brief-interview lp-ui-profile lp-seo lp-motion lp-media lp-performance taiga-sprint-rollover taiga-ticket-docs; do [ -e "$CFG/skills/$s" ] && { wrn "skill local duplicado: $s" "bórralo de $CFG/skills"; dups=1; }; done
+for a in "$CFG"/agents/flow-*.md "$CFG"/agents/lp-*.md "$CFG"/agents/ui-*.md "$CFG"/agents/manual-tester.md; do [ -e "$a" ] && { wrn "agente local duplicado: $(basename "$a")" "bórralo de $CFG/agents"; dups=1; }; done
+for c in changelog commit commit-changes commit-convention release release-pr ship doctor promote; do [ -e "$CFG/commands/$c.md" ] && { wrn "comando local duplicado: $c" "bórralo de $CFG/commands"; dups=1; }; done
 [ "$dups" -eq 0 ] && pass "sin duplicados"
 
 sec "Hook anti-firma"

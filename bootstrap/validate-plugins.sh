@@ -93,6 +93,31 @@ for name in $names; do
 done
 [ "$col" -eq 0 ] && pass "sin nombres repetidos entre plugin y dependencias"
 
+sec "Consistencia del bootstrap (setup · settings · doctor)"
+DOC="$ROOT/plugins/mp-core/scripts/doctor.sh"; SETUP="$ROOT/bootstrap/setup.sh"; SB="$ROOT/bootstrap/settings.base.json"
+if [ -f "$DOC" ] && [ -f "$SETUP" ] && [ -f "$SB" ]; then
+  jq -e . "$SB" >/dev/null 2>&1 && pass "settings.base.json válido" || bad "settings.base.json inválido"
+  doc_plugins=$(grep -E '^for p in ' "$DOC" | head -1 | sed 's/^for p in //; s/; do.*//' | tr ' ' '\n' | sort -u)
+  cons=0
+  # 1) todo plugin habilitado en settings.base.json lo verifica el doctor y tiene su marketplace declarado
+  for p in $(jq -r '.enabledPlugins | keys[]' "$SB"); do
+    echo "$doc_plugins" | grep -qx "$p" || { bad "$p está en settings.base.json pero el doctor no lo verifica"; cons=1; }
+    mk=${p#*@}
+    case "$mk" in claude-plugins-official) ;; *) jq -e --arg m "$mk" '.extraKnownMarketplaces | has($m)' "$SB" >/dev/null 2>&1 || { bad "$p: marketplace '$mk' no declarado en extraKnownMarketplaces"; cons=1; } ;; esac
+  done
+  # 2) todo plugin que instala setup.sh lo verifica el doctor
+  for p in $(grep -oE '"[A-Za-z0-9._-]+/[A-Za-z0-9._-]+ [a-z0-9-]+@[a-z0-9-]+"' "$SETUP" | tr -d '"' | awk '{print $2}'); do
+    echo "$doc_plugins" | grep -qx "$p" || { bad "setup.sh instala $p pero el doctor no lo verifica"; cons=1; }
+  done
+  # 3) todo plugin del marketplace aparece en el doctor (lista de usuario o sección propia, como mp-lp)
+  for n in $names; do grep -q "$n@mp-marketplace" "$DOC" || { bad "el doctor no menciona $n@mp-marketplace"; cons=1; }; done
+  # 4) la lista de skills de Emil Kowalski coincide entre setup.sh y doctor
+  s_emil=$(sed -n 's/^EMIL_SKILLS="\(.*\)"/\1/p' "$SETUP" | tr ' ' '\n' | sort)
+  d_emil=$(grep -E 'emil_miss="\$emil_miss' "$DOC" | head -1 | sed 's/^for s in //; s/; do.*//' | tr ' ' '\n' | sort)
+  [ -n "$s_emil" ] && [ "$s_emil" = "$d_emil" ] || { bad "la lista EMIL_SKILLS de setup.sh y la del doctor difieren"; cons=1; }
+  [ "$cons" -eq 0 ] && pass "setup, settings y doctor cubren los mismos plugins y skills"
+else echo "  (bootstrap incompleto, se omite)"; fi
+
 sec "claude plugin validate"
 if command -v claude >/dev/null 2>&1; then
   for name in $names; do
