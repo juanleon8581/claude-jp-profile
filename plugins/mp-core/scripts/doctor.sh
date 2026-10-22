@@ -21,7 +21,7 @@ if have node; then
   v=$(node -p 'process.versions.node' 2>/dev/null); maj=${v%%.*}; min=${v#*.}; min=${min%%.*}
   if [ "$maj" -gt 22 ] || { [ "$maj" -eq 22 ] && [ "$min" -ge 13 ]; }; then pass "node $v (≥ 22.13)"; else wrn "node $v" "caveman/context-mode piden ≥ 22.13"; fi
 fi
-have python3 && pass "python3 ($(python3 --version 2>&1 | cut -d' ' -f2))" || bad "python3 no está instalado" "lo usa el buscador de ui-ux-pro-max (flow-designer); brew install python"
+have python3 && pass "python3 ($(python3 --version 2>&1 | cut -d' ' -f2))" || bad "python3 no está instalado" "lo usa el buscador de ui-ux-pro-max (ui-designer); brew install python"
 have gh && { gh auth status >/dev/null 2>&1 && pass "gh autenticado" || wrn "gh sin sesión" "gh auth login"; }
 
 sec "settings.json"
@@ -40,7 +40,7 @@ else bad "$SET ausente o inválido" "corre bootstrap/setup.sh"; fi
 
 sec "Plugins"
 IP="$CFG/plugins/installed_plugins.json"
-for p in mp-core@mp-marketplace mp@mp-marketplace caveman@caveman context-mode@context-mode skill-creator@claude-plugins-official supabase@supabase-agent-skills postgres-best-practices@supabase-agent-skills terminal-browser@terminal-browser ui-ux-pro-max@ui-ux-pro-max-skill impeccable@impeccable taste-skill@taste-skill; do
+for p in mp-core@mp-marketplace mp@mp-marketplace caveman@caveman context-mode@context-mode skill-creator@claude-plugins-official supabase@supabase-agent-skills postgres-best-practices@supabase-agent-skills terminal-browser@terminal-browser ui-ux-pro-max@ui-ux-pro-max-skill impeccable@impeccable taste-skill@taste-skill humanizer@humanizer; do
   if [ -f "$IP" ] && jq -e --arg p "$p" '.plugins[$p]' "$IP" >/dev/null 2>&1; then pass "$p instalado"
   elif [ -f "$SET" ] && jq -e --arg p "$p" '.enabledPlugins[$p]' "$SET" >/dev/null 2>&1; then wrn "$p habilitado pero aún no instalado" "abre claude para que lo descargue o /plugin install $p"
   else bad "$p no está instalado" "/plugin install $p"; fi
@@ -76,6 +76,11 @@ else bad "$CJ ausente o inválido" "corre bootstrap/setup.sh"; fi
 sec "Context7 (ctx7 setup --cli)"
 [ -f "$CFG/rules/context7.md" ] && pass "regla rules/context7.md" || bad "falta $CFG/rules/context7.md" "npx ctx7 setup --cli --claude"
 [ -e "$CFG/skills/find-docs" ] && pass "skill find-docs" || bad "falta skill find-docs" "npx ctx7 setup --cli --claude"
+
+sec "Skills de Emil Kowalski (emilkowalski/skills)"
+emil_miss=""
+for s in emil-design-eng animate review-animations improve-animations find-animation-opportunities animation-performance animation-vocabulary apple-design pick-ui-library prototype mobile-native break-ui; do [ -e "$CFG/skills/$s" ] || emil_miss="$emil_miss $s"; done
+[ -z "$emil_miss" ] && pass "12 skills de emilkowalski/skills instaladas" || bad "faltan skills de emilkowalski/skills:$emil_miss" "bootstrap/setup.sh (o npx skills@latest add emilkowalski/skills -g -a claude-code)"
 
 sec "terminal-browser"
 have terminal-browser && pass "binario terminal-browser" || bad "terminal-browser no está instalado" "bootstrap/setup.sh (o curl -fsSL https://terminal-browser.sh/install | bash)"

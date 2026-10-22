@@ -15,7 +15,7 @@ CFG="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 if [ -n "${CLAUDE_CONFIG_DIR:-}" ]; then CJ="$CFG/.claude.json"; export CLAUDE_CONFIG_DIR="$CFG"; else CJ="$HOME/.claude.json"; fi
 for c in jq claude; do command -v "$c" >/dev/null || { echo "Falta $c"; exit 1; }; done
 mkdir -p "$CFG"
-command -v python3 >/dev/null || echo "!! Aviso: falta python3 (lo usa ui-ux-pro-max / flow-designer); instálalo con brew install python"
+command -v python3 >/dev/null || echo "!! Aviso: falta python3 (lo usa ui-ux-pro-max / ui-designer); instálalo con brew install python"
 
 # 1) settings.json: deep merge; allow/ask se unen sin duplicar
 [ -f "$CFG/settings.json" ] || echo '{}' > "$CFG/settings.json"
@@ -60,11 +60,12 @@ if command -v terminal-browser >/dev/null; then
   fi
 fi
 
-# 2c) Plugins de diseño (marketplace de GitHub + install); settings.base.json solo los declara/habilita
+# 2c) Plugins de diseño y escritura (marketplace de GitHub + install); settings.base.json solo los declara/habilita
 IP="$CFG/plugins/installed_plugins.json"
 for entry in "nextlevelbuilder/ui-ux-pro-max-skill ui-ux-pro-max@ui-ux-pro-max-skill" \
              "pbakaus/impeccable impeccable@impeccable" \
-             "Leonxlnx/taste-skill taste-skill@taste-skill"; do
+             "Leonxlnx/taste-skill taste-skill@taste-skill" \
+             "blader/humanizer humanizer@humanizer"; do
   repo="${entry%% *}"; plug="${entry##* }"
   if [ -f "$IP" ] && jq -e --arg p "$plug" '.plugins[$p]' "$IP" >/dev/null 2>&1; then
     echo "= plugin $plug ya aplicado"
@@ -74,6 +75,20 @@ for entry in "nextlevelbuilder/ui-ux-pro-max-skill ui-ux-pro-max@ui-ux-pro-max-s
       || echo "!! $plug no se instaló; hazlo a mano: /plugin marketplace add $repo  y  /plugin install $plug"
   fi
 done
+
+# 2d) Skills de Emil Kowalski (emilkowalski/skills). No es un marketplace de plugins: se instalan con la CLI `skills`
+#     como carpetas en $CFG/skills. Subconjunto para web (se omiten animate-expo, write-swift y ask-sonner).
+EMIL_SKILLS="emil-design-eng animate review-animations improve-animations find-animation-opportunities animation-performance animation-vocabulary apple-design pick-ui-library prototype mobile-native break-ui"
+emil_missing=0
+for s in $EMIL_SKILLS; do [ -e "$CFG/skills/$s" ] || emil_missing=1; done
+if [ "$emil_missing" -eq 0 ]; then
+  echo "= skills de emilkowalski/skills ya aplicadas"
+else
+  echo "+ skills de emilkowalski/skills"
+  # shellcheck disable=SC2086
+  npx -y skills@latest add emilkowalski/skills -g -a claude-code -s $EMIL_SKILLS -y >/dev/null \
+    || echo "!! skills de emilkowalski/skills no se instalaron; hazlo a mano: npx skills@latest add emilkowalski/skills -g -a claude-code -s $EMIL_SKILLS"
+fi
 
 # 3) MCPs a nivel usuario
 prev(){ [ -f "$CJ" ] && jq -r "$1 // empty" "$CJ" 2>/dev/null || true; }
