@@ -1,5 +1,10 @@
 # Changelog — mp-lp
 
+## [0.1.1] - 2026-10-22
+
+### Fixed
+- La comprobación del proyecto recomienda `typescript@6`, porque `astro check` aún no soporta TypeScript 7 (b227da6).
+
 ## [0.1.0] - 2026-10-22
 
 ### Added

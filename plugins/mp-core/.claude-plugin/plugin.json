@@ -1,7 +1,7 @@
 {
   "name": "mp-core",
   "description": "Núcleo común de mis perfiles de Claude Code: commits, releases, promote, doctor, skills de Taiga y hook anti-firma. Lo usan mp y los demás perfiles.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": { "name": "JP León" },
   "repository": "https://github.com/juanleon8581/claude-jp-profile"
 }
