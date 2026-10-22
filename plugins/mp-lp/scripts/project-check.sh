@@ -20,7 +20,7 @@ sec "Stack (Astro + TypeScript + Tailwind)"
 if [ -f package.json ]; then
   pass "package.json"
   dep astro && pass "astro ($(jq -r '(.dependencies.astro // .devDependencies.astro)' package.json))" || bad "astro no está en package.json" "el flujo lp asume Astro (npm create astro@latest)"
-  dep typescript && pass "typescript" || wrn "typescript no está en package.json" "npx astro add typescript o npm i -D typescript"
+  dep typescript && pass "typescript" || wrn "typescript no está en package.json" "npm i -D typescript@6 (astro check aún no soporta TypeScript 7)"
   dep @astrojs/check && pass "@astrojs/check (astro check)" || wrn "falta @astrojs/check" "npm i -D @astrojs/check; lo usan los agentes para compilar tipos"
   { dep tailwindcss || dep @tailwindcss/vite; } && pass "tailwindcss" || bad "tailwindcss no está en package.json" "npx astro add tailwind"
   dep @astrojs/sitemap && pass "@astrojs/sitemap" || wrn "falta @astrojs/sitemap" "npx astro add sitemap (lo configura lp-seo)"

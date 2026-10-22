@@ -63,7 +63,7 @@ Pregunta antes de cada paso; ninguno es automático:
 3. Push de la rama y de los tags (`git push origin <rama> --follow-tags` o los tags por nombre). Solo si el usuario lo pide.
 4. Opcional: `gh release create v<x.y.z>` con la sección del CHANGELOG raíz como notas.
 
-Los tags se ponen en el commit que quedará en `main`: si el release va por PR, etiqueta **después del merge** (sobre el commit de `main`), no antes.
+Orden cuando el cambio llega por PR: corre este comando en la **rama del PR**, antes del merge, para que versiones y CHANGELOG viajen en el mismo PR (en la rama haz solo el commit del paso 4.1). Los **tags** se ponen **después del merge**, sobre el commit de `main`, nunca antes; si el comando se corre ya en `main`, en el paso 4 solo quedan los tags.
 
 ## Reglas
 

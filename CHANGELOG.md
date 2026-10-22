@@ -2,6 +2,18 @@
 
 Versión del repo `mp-marketplace` (SemVer). Cada entrada es una instantánea: qué versión de cada plugin iba junta. El detalle de cada plugin está en su propio `CHANGELOG.md`. Tags: `v<x.y.z>` para el repo y `<plugin>-v<x.y.z>` para cada plugin.
 
+## [2.0.1] - 2026-10-22
+
+Correcciones menores y aclaración del flujo de release.
+
+| Plugin | Versión | Cambio |
+|---|---|---|
+| [mp-core](plugins/mp-core/CHANGELOG.md) | 1.0.1 | patch — `marketplace-release` aclara el orden de versiones y tags |
+| [mp](plugins/mp/CHANGELOG.md) | 2.0.0 | sin cambios |
+| [mp-lp](plugins/mp-lp/CHANGELOG.md) | 0.1.1 | patch — `project-check` recomienda `typescript@6` |
+
+El README del repo documenta el mismo orden (sin versión de plugin propia).
+
 ## [2.0.0] - 2026-10-22
 
 Separa `mp` en un núcleo común y perfiles, y añade el perfil de landing pages.
