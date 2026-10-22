@@ -20,7 +20,7 @@ Skill de nivel usuario, se usa en cualquier proyecto con el plugin `mp-lp` habil
 
 | Agente | Rol | Escribe |
 |---|---|---|
-| `mp-lp:lp-strategist` | Brief: objetivo, audiencia, mensaje, CTA, keywords, copy base | nada (devuelve el brief) |
+| `mp-lp:lp-strategist` | Analista del brief, sin estado, en tres modos: `analyze` (cobertura y preguntas), `review` (preparación para los demás agentes) y `draft` (brief final). No conversa: la entrevista la llevas tú | nada (devuelve análisis o borrador) |
 | `mp-core:ui-designer` | Dirección: mapa de secciones, sistema visual, lenguaje de movimiento, estados, responsive (agente compartido con `mp`; perfil `mp-lp:lp-ui-profile`) | nada (devuelve la dirección) |
 | `mp-core:ui-coder` | Construye una sección: `.astro` + Tailwind, islas shadcn si hay interacción (compartido; mismo perfil) | código de la sección |
 | `mp-core:ui-refiner` | Una pasada final de calidad de la sección: accesibilidad, responsive, estados, tokens (compartido; mismo perfil) | correcciones de UI |
@@ -37,7 +37,11 @@ Quién escribe qué: el orquestador guarda los artefactos de `lp/` (brief, direc
 ```
 lp/
   state.json        estado del flujo (ver abajo)
+  brief.draft.md    borrador vivo de la entrevista (cobertura, registro, brief en construcción)
   brief.md          brief aprobado
+  brief-log.md      registro de decisiones de la entrevista (respuestas y su fuente)
+  cuestionario-cliente.md  preguntas escaladas, listas para enviar al cliente (si las hay)
+  insumos-impeccable.md    resumen del brief para /impeccable init
   direction.md      dirección de diseño aprobada (fuente de verdad visual)
   sections.md       plan de secciones, una por bloque, con checkbox - [ ] / - [x]
   audits/           seo.md, qa.md (último informe de cada uno)
@@ -49,6 +53,7 @@ lp/
 {
   "slug": "landing-x",
   "phase": "brief | direction | build | audit | qa | ship | done",
+  "brief": { "status": "none | interviewing | waiting-client | approved", "round": 0, "depth": "core", "escalated": 0 },
   "gates": { "direction": false, "qa": false },
   "sections": [{ "id": "hero", "name": "Hero", "status": "pending | built | approved", "motion": true, "media": true }],
   "rounds": { "audit": 0 },
@@ -61,17 +66,21 @@ Lo escribe solo el orquestador. Los archivos de `lp/` se versionan con el proyec
 
 ## Fase 0 — Precondición
 
-Corre `bash "${CLAUDE_PLUGIN_ROOT}/scripts/project-check.sh"`. Con ✖ detente y sugiere `/mp-lp:init`. Avisos de `PRODUCT.md`/`DESIGN.md`: sin `PRODUCT.md` el strategist y el designer lo reportan como bloqueo (su creación es una entrevista con el usuario, no se inventa).
+Corre `bash "${CLAUDE_PLUGIN_ROOT}/scripts/project-check.sh"`. Con ✖ detente y sugiere `/mp-lp:init`. `PRODUCT.md` **no bloquea el brief** (la entrevista cubre lo esencial del negocio y deja `lp/insumos-impeccable.md` para `/impeccable init`). Sí es requisito de la fase de dirección: su creación es una entrevista del usuario con `impeccable`, no se inventa. `DESIGN.md` es recomendado.
 
 ## Las fases
 
-### 1. Brief (`lp start` y `lp brief`)
-1. Pregunta: nombre/slug del landing y **"¿Quieres seguimiento documental en Taiga para este flujo?"**. Si sí, pregunta proyecto, sprint y asignado (consulta Taiga en solo lectura) y guárdalos en `state.json.taiga`. Si Taiga no responde, dilo y continúa sin él.
-2. Lanza `lp-strategist` con lo que el usuario ya dijo, `PRODUCT.md` y los assets existentes.
-3. Muestra el brief completo; con la aprobación del usuario lo guardas en `lp/brief.md`. Las preguntas abiertas del strategist se resuelven con el usuario, no por tu cuenta.
-4. Taiga activo: checkpoint de documentación (ver abajo): crea la US en lenguaje de negocio.
+### 1. Brief (`lp start` y `lp brief`) — entrevista guiada
+La fase de **exploración y definición**, y la más importante del flujo: se conduce como una conversación, no como un informe. **Carga la skill `mp-lp:lp-brief-interview`** y sigue su protocolo (el subagente no conversa: la entrevista la llevas tú en el hilo principal con `AskUserQuestion`).
+
+1. Pregunta el nombre/slug del landing y **"¿Quieres seguimiento documental en Taiga para este flujo?"**. Si sí, pregunta proyecto, sprint y asignado (consulta Taiga en solo lectura) y guárdalos en `state.json.taiga`. Si Taiga no responde, dilo y continúa sin él. Acepta un archivo inicial (`lp start --from <archivo>`).
+2. **Analiza** (`lp-strategist` modo `analyze`), **entrevista por rondas** (bloqueantes primero, con opción "No lo sé, preguntar al cliente"), **revisa** (`review`) y **cierra** (`draft`), como dice la skill. Profundidad adaptativa: siempre el núcleo; las dimensiones profundas se activan por señales o cuando el usuario lo pida.
+3. El estado vive en `lp/brief.draft.md` (retomable en otra sesión). Las preguntas escaladas generan `lp/cuestionario-cliente.md`; las respuestas del cliente se integran con `lp brief --from`.
+4. Con la aprobación explícita del brief completo: `lp/brief.md`, `lp/brief-log.md`, `lp/insumos-impeccable.md` (para que el usuario ejecute `/impeccable init`, que **no se reemplaza**) y `state.json` actualizado.
+5. Taiga activo: checkpoint de documentación (ver abajo): crea la US en lenguaje de negocio.
 
 ### 2. Dirección (`lp direction`) → **Gate 1**
+0. **Precondición:** `lp/brief.md` aprobado y `PRODUCT.md` existente. Si falta `PRODUCT.md`, detente y pide al usuario ejecutar `/impeccable init` (con `lp/insumos-impeccable.md` como evidencia); no lo escribas tú.
 1. Lanza `Agent(subagent_type: "mp-core:ui-designer")` indicándole el **perfil** `mp-lp:lp-ui-profile` y pasándole `lp/brief.md`, `PRODUCT.md`, `DESIGN.md` y el estado actual del repo.
 2. Presenta la dirección completa al usuario. Con su aprobación explícita guárdala en `lp/direction.md`, genera `lp/sections.md` (una sección por bloque, en orden de página, marcando cuáles llevan movimiento y medios) y la lista en `state.json`. `gates.direction = true`.
 3. Sin esta aprobación **no se escribe UI**.
@@ -134,8 +143,10 @@ Audiencia no técnica: nada de archivos, comandos, librerías, agentes ni jerga 
 
 | Comando | Qué hace |
 |---|---|
-| `lp start` | Fase 0 + pregunta de Taiga + brief |
-| `lp brief` / `lp direction` | Repite o ajusta esa fase (si cambia algo ya aprobado, avisa que invalida los gates posteriores) |
+| `lp start [--from <archivo>]` | Fase 0 + pregunta de Taiga + entrevista de brief (con archivo inicial opcional) |
+| `lp brief` / `lp direction` | Retoma o ajusta esa fase (si cambia algo ya aprobado, avisa que invalida los gates posteriores) |
+| `lp brief --from <respuestas>` | Integra las respuestas del cliente al cuestionario y continúa la entrevista |
+| `lp brief --cuestionario` | Regenera `lp/cuestionario-cliente.md` con las preguntas escaladas aún abiertas |
 | `lp approve` | Registra la aprobación de la fase o sección en curso |
 | `lp build [sección]` | Fase 3 de una sección |
 | `lp audit` / `lp qa` | Fases 4 y 5 |
@@ -146,6 +157,7 @@ Audiencia no técnica: nada de archivos, comandos, librerías, agentes ni jerga 
 
 ## Reglas duras (no romper)
 
+- **Nunca inventar una respuesta de la entrevista**: lo que no se sabe queda `abierto`, `escalado` al cliente o `supuesto` confirmado por el usuario. El brief no se aprueba con bloqueantes escaladas abiertas salvo que el usuario decida asumirlas.
 - **Nunca lanzar `ui-designer`, `ui-coder` o `ui-refiner` sin el perfil `mp-lp:lp-ui-profile`.**
 - **Nunca escribir UI sin `lp/direction.md` aprobado** ni guardar un artefacto que el usuario no vio.
 - **Nunca hacer git** (add, commit, push, branch, deploy) sin orden directa del usuario. Los agentes no hacen git jamás.
@@ -160,7 +172,7 @@ Audiencia no técnica: nada de archivos, comandos, librerías, agentes ni jerga 
 ## Herramientas
 
 - Agentes: tool `Agent` con los `subagent_type` del roster (prefijo `mp-lp:`).
-- Skills de referencia (las cargan los agentes): `mp-lp:lp-seo`, `mp-lp:lp-motion`, `mp-lp:lp-media`, `mp-lp:lp-performance`.
+- Skill de la fase de brief (la cargas tú): `mp-lp:lp-brief-interview`. Skills de referencia (las cargan los agentes): `mp-lp:lp-seo`, `mp-lp:lp-motion`, `mp-lp:lp-media`, `mp-lp:lp-performance`.
 - **Perfil de los agentes de UI compartidos:** cada vez que lances `mp-core:ui-designer`, `ui-coder` o `ui-refiner` incluye en el prompt `Perfil: mp-lp:lp-ui-profile` (ellos lo cargan). Sin perfil se comportarían como en `flow-auto` (OpenSpec).
 - Diseño: `impeccable`, `ui-ux-pro-max`, `taste-skill`, las skills de `emilkowalski/skills` y MCP `shadcn` (los usan los agentes de UI); `terminal-browser` (lo usa `mp-core:manual-tester`).
 - Taiga (opcional): `mcp__taiga__*` a través de `lp-documenter`; el orquestador solo lee.

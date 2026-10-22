@@ -24,15 +24,16 @@ Con el diagnóstico y leyendo el repo (`package.json`, `astro.config.*`, `CLAUDE
 - **Comandos:** tipos (`astro check`), build (`astro build`), preview (`astro preview`, puerto 4321 por defecto) y desarrollo (`astro dev`), con el gestor del proyecto (`pnpm`/`npm`/`yarn`, según el lockfile). Propón los que salgan de `package.json` y pide confirmación.
 - **Stack y reglas del flujo lp:** una sección corta: Astro + TypeScript estricto + Tailwind; shadcn solo en islas interactivas; las secciones estáticas son `.astro`; el estado del flujo vive en `lp/`.
 
-### b) Plugins por proyecto
-La separación de perfiles se hace habilitando plugins **por proyecto**. Propón estos comandos (con aprobación, los ejecutas con Bash desde la raíz del proyecto):
+### b) Apagar `mp` en este proyecto
+Si este comando está corriendo, `mp-lp` ya está instalado y habilitado aquí (se instala **antes**, por fuera de claude: `claude plugin install mp-lp@mp-marketplace --scope project`; no puede instalarse a sí mismo). Lo que falta es separar los perfiles: en un landing sobran los agentes de backend de `mp` (arquitecto, tester, reviewer).
+
+Comprueba si `mp` sigue habilitado en el proyecto (`.claude/settings.json` y el de usuario). Si lo está, propón y, con aprobación, ejecuta desde la raíz del proyecto:
 
 ```bash
-claude plugin install mp-lp@mp-marketplace --scope project
 claude plugin disable mp@mp-marketplace --scope project
 ```
 
-El primero instala y habilita `mp-lp` (y `mp-core`, su dependencia) solo en este proyecto; el segundo apaga `mp` aquí. Explica por qué: en un landing sobran sus agentes de backend (arquitecto, tester, reviewer). Si prefieres no usar la CLI, el equivalente es fusionar con `jq` en `.claude/settings.json` del proyecto `{ "enabledPlugins": { "mp-core@mp-marketplace": true, "mp-lp@mp-marketplace": true, "mp@mp-marketplace": false } }` sin perder otras claves. Los cambios se ven tras `/reload-plugins`.
+Equivalente sin la CLI: fusionar con `jq` en `.claude/settings.json` del proyecto `{ "enabledPlugins": { "mp@mp-marketplace": false } }` sin perder otras claves. Si el proyecto mezcla app y landing, no lo apagues: pregunta al usuario. Los cambios se ven tras `/reload-plugins`.
 
 ### c) Requisitos que solo se reportan
 Nunca se resuelven aquí, indica el comando al usuario: `astro` y dependencias (`npx astro add tailwind|react|sitemap`), `components.json` (`npx shadcn@latest init`), `PRODUCT.md` (`/impeccable init`, es una entrevista) y `DESIGN.md` (`/impeccable document`).

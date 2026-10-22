@@ -35,7 +35,7 @@ else wrn "astro.config.* no existe"; fi
 
 sec "shadcn y diseño"
 [ -f components.json ] && pass "components.json (shadcn)" || wrn "components.json no existe" "npx shadcn@latest init (lo decide el usuario; solo hace falta si habrá componentes interactivos)"
-[ -f PRODUCT.md ] && pass "PRODUCT.md" || wrn "PRODUCT.md no existe" "/impeccable init (entrevista con el usuario); lp-strategist y ui-designer lo usan"
+[ -f PRODUCT.md ] && pass "PRODUCT.md" || wrn "PRODUCT.md no existe" "/impeccable init (entrevista con el usuario); no bloquea el brief; ui-designer lo exige antes de la dirección"
 [ -f DESIGN.md ] && pass "DESIGN.md" || wrn "DESIGN.md no existe" "/impeccable document (recomendado una vez exista UI)"
 
 sec "CLAUDE.md"
