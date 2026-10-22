@@ -1,12 +1,27 @@
 {
   "name": "mp-marketplace",
-  "owner": { "name": "JP León" },
-  "metadata": { "description": "Marketplace privado con mi perfil de Claude Code (mp = my-profile)." },
+  "owner": {
+    "name": "JP León"
+  },
+  "metadata": {
+    "description": "Marketplace privado con mis perfiles de Claude Code (mp = my-profile).",
+    "version": "2.0.0"
+  },
   "plugins": [
+    {
+      "name": "mp-core",
+      "source": "./plugins/mp-core",
+      "description": "Núcleo común: commit, release, promote, doctor, skills de Taiga y hook anti-firma."
+    },
     {
       "name": "mp",
       "source": "./plugins/mp",
-      "description": "Mi perfil de Claude Code: flow, flow-auto, agentes flow-*, skills de Taiga y comandos de commit/release."
+      "description": "Perfil técnico: flow, flow-auto y agentes flow-*. Depende de mp-core."
+    },
+    {
+      "name": "mp-lp",
+      "source": "./plugins/mp-lp",
+      "description": "Perfil de landing pages: flow ligero lp (Astro + TS + Tailwind + shadcn) con agentes de SEO, movimiento, medios y QA. Depende de mp-core."
     }
   ]
 }

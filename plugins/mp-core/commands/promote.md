@@ -3,9 +3,9 @@ description: "Promueve a un Pull Request los cambios hechos en caliente en skill
 allowed-tools: Bash(bash:*), Read, Write
 ---
 
-# /mp:promote
+# /mp-core:promote
 
-Toma los cambios que hiciste en caliente sobre la copia instalada del plugin (`~/.claude/plugins/cache/mp-marketplace/mp/<ver>/`) y los lleva al repo **vía Pull Request**. Nunca hace push a `main`, no sube la versión del plugin (eso se hace con `/mp:release` al hacer merge) y no toca el clon del marketplace (trabaja en un worktree temporal).
+Toma los cambios que hiciste en caliente sobre la copia instalada de los plugins del marketplace (`~/.claude/plugins/cache/mp-marketplace/<plugin>/<ver>/`, ej. `mp` y `mp-core`) y los lleva al repo **vía Pull Request**. Nunca hace push a `main`, no sube la versión del plugin (eso se hace con `/mp-core:release` al hacer merge) y no toca el clon del marketplace (trabaja en un worktree temporal).
 
 Argumentos opcionales: `$ARGUMENTS` (descripción corta del cambio, útil para el nombre de rama y el título).
 
@@ -15,7 +15,7 @@ Argumentos opcionales: `$ARGUMENTS` (descripción corta del cambio, útil para e
 bash "${CLAUDE_PLUGIN_ROOT}/scripts/promote.sh" scan
 ```
 
-Compara la caché contra la base instalada (`gitCommitSha`) y contra `origin/main`. La salida es `estado<TAB>marca<TAB>ruta`:
+Compara la caché contra la base instalada (`gitCommitSha`) y contra `origin/main`. La salida es `estado<TAB>marca<TAB><plugin>/<ruta>` (ej. `mp/agents/flow-coder.md`):
 - Estado: `M` modificado, `A` nuevo, `D` borrado localmente.
 - Marca `ok`: solo cambió tu copia. Marca `CONFLICTO`: `main` también cambió ese archivo desde tu base.
 
@@ -26,7 +26,7 @@ Si no hay cambios, termina. Los archivos que `main` ya tiene idénticos, o que n
 Para cada archivo muestra el diff:
 
 ```bash
-bash "${CLAUDE_PLUGIN_ROOT}/scripts/promote.sh" diff <ruta>
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/promote.sh" diff <plugin>/<ruta>
 ```
 
 Resume en una línea qué cambió y por qué (infiérelo del diff). Presenta la lista y pide al usuario qué archivos promover; solo lo aceptado entra. Reglas:
@@ -42,7 +42,7 @@ Con la selección aprobada, arma:
 - **Body** en un archivo temporal (Write en el scratchpad): resumen, lista de archivos con el motivo de cada uno y, si los hay, los `CONFLICTO` resueltos y cómo. Nada de firmas ni "Generated with".
 
 ```bash
-bash "${CLAUDE_PLUGIN_ROOT}/scripts/promote.sh" open "<rama>" "<título>" "<body-file>" <ruta> [<ruta>...]
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/promote.sh" open "<rama>" "<título>" "<body-file>" <plugin>/<ruta> [<plugin>/<ruta>...]
 ```
 
 El script crea el worktree desde `origin/main`, copia los archivos, commitea, hace push (o fork si no hay permiso de escritura) y abre el PR con `gh`.
@@ -50,5 +50,5 @@ El script crea el worktree desde `origin/main`, copia los archivos, commitea, ha
 ## 4. Cierre
 
 Muestra la URL del PR. Recuerda al usuario:
-- Tras el merge: `/mp:release` (o subir `plugin.json` a mano) para versionar, y luego `/plugin marketplace update mp-marketplace` más update del plugin en cada equipo.
+- Tras el merge: `/mp-core:release` (o subir el `plugin.json` del plugin afectado a mano) para versionar, y luego `/plugin marketplace update mp-marketplace` más update del plugin en cada equipo.
 - No hagas merge ni subas la versión por tu cuenta.

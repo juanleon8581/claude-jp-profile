@@ -33,6 +33,7 @@
     "command": "~/.claude/statusline.sh"
   },
   "enabledPlugins": {
+    "mp-core@mp-marketplace": true,
     "mp@mp-marketplace": true,
     "caveman@caveman": true,
     "skill-creator@claude-plugins-official": true,
@@ -42,7 +43,8 @@
     "terminal-browser@terminal-browser": true,
     "ui-ux-pro-max@ui-ux-pro-max-skill": true,
     "impeccable@impeccable": true,
-    "taste-skill@taste-skill": true
+    "taste-skill@taste-skill": true,
+    "humanizer@humanizer": true
   },
   "extraKnownMarketplaces": {
     "mp-marketplace": {
@@ -91,6 +93,12 @@
       "source": {
         "source": "github",
         "repo": "Leonxlnx/taste-skill"
+      }
+    },
+    "humanizer": {
+      "source": {
+        "source": "github",
+        "repo": "blader/humanizer"
       }
     }
   },

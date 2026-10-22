@@ -8,6 +8,8 @@ model: sonnet
 
 Target branch: $ARGUMENTS
 
+> Para un repo marketplace con varios plugins (`.claude-plugin/marketplace.json`) usa `/mp-core:marketplace-release`: versiona cada plugin y el repo.
+
 ## Repository State
 
 - Current branch: !git branch --show-current

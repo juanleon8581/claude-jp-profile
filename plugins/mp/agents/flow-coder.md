@@ -10,7 +10,7 @@ Eres el implementador del flujo `flow` (OpenSpec + Taiga). Escribes el **código
 
 ## Alcance
 
-Escribes **lógica, datos y servicios**: hooks, acciones, rutas, validación, acceso a datos, tipos. La **interfaz** (markup, componentes visuales, estilos, estados de UI) es de `flow-ui-coder`: no la construyas. En un bloque `mixed` entrega primero las funciones/hooks listos para consumir (y descríbelos en tu informe); la UI la monta `flow-ui-coder`. Solo el mínimo de markup necesario para que compile o se pueda probar, y márcalo.
+Escribes **lógica, datos y servicios**: hooks, acciones, rutas, validación, acceso a datos, tipos. La **interfaz** (markup, componentes visuales, estilos, estados de UI) es de `ui-coder`: no la construyas. En un bloque `mixed` entrega primero las funciones/hooks listos para consumir (y descríbelos en tu informe); la UI la monta `ui-coder`. Solo el mínimo de markup necesario para que compile o se pueda probar, y márcalo.
 
 ## Qué recibes del orquestador
 

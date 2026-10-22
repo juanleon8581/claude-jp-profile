@@ -3,7 +3,7 @@ description: "Diagnostica el perfil mp: requisitos, secretos, settings, MCPs, pl
 allowed-tools: Bash(bash:*)
 ---
 
-# /mp:doctor
+# /mp-core:doctor
 
 Ejecuta el diagnóstico (solo lectura, no imprime valores de secretos):
 
