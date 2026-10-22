@@ -6,7 +6,7 @@ Mis perfiles de Claude Code como plugins privados (`mp` = _my-profile_) dentro d
 
 | Dónde                         | Contenido                                                                                                       |
 | ----------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `plugins/mp-core/commands`    | `doctor`, `promote`, `commit`, `commit-changes`, `commit-convention`, `changelog`, `release`, `release-pr`, `ship` |
+| `plugins/mp-core/commands`    | `doctor`, `promote`, `commit`, `commit-changes`, `commit-convention`, `changelog`, `release`, `release-pr`, `ship`, `marketplace-release` |
 | `plugins/mp-core/skills`      | `taiga-sprint-rollover`, `taiga-ticket-docs`                                                                    |
 | `plugins/mp-core/hooks`       | Hook PreToolUse que bloquea commits firmados por Claude                                                         |
 | `plugins/mp/skills`           | `flow`, `flow-auto`, `flow-architecture`                                                                        |
@@ -136,10 +136,19 @@ La versión 2.0 de `mp` separa el núcleo y cambia nombres. Tras `/plugin market
 - Los agentes de UI de `flow-auto` ahora son compartidos: `mp:flow-designer`, `mp:flow-ui-coder`, `mp:flow-ui-refiner` y `mp:flow-manual-tester` pasan a `mp-core:ui-designer`, `ui-coder`, `ui-refiner` y `manual-tester`.
 - Vuelve a correr `bootstrap/setup.sh` para instalar lo nuevo de terceros (`humanizer` y las skills de Emil Kowalski).
 
+## Versionado
+
+Dos niveles (SemVer en ambos):
+
+- **Plugin:** `version` en `plugins/<p>/.claude-plugin/plugin.json`, `plugins/<p>/CHANGELOG.md` y tag `<plugin>-v<x.y.z>` (por ejemplo `mp-core-v1.0.0`). Claude Code usa esta versión para detectar actualizaciones.
+- **Repo:** `metadata.version` en `marketplace.json`, tag `v<x.y.z>` y [`CHANGELOG.md`](CHANGELOG.md) raíz, cuya tabla dice qué versión de cada plugin iba junta. Sube con el mayor bump de los plugins: major si alguno rompe compatibilidad, minor si hay plugin o función nueva, patch si solo hay correcciones.
+
+`/mp-core:marketplace-release` propone los bumps desde los commits de cada carpeta, escribe los CHANGELOG y las versiones, y deja los tags y el push a tu confirmación. `bash plugins/mp-core/scripts/release-status.sh` muestra el estado sin tocar nada, y el validador comprueba que versiones, CHANGELOG y tabla coinciden. Los tags se ponen sobre el commit de `main` (tras el merge del PR).
+
 ## Flujo de actualización
 
 1. Editar en `plugins/<plugin>/` (o `bootstrap/`) y correr `bash bootstrap/validate-plugins.sh`.
-2. Subir `version` en `plugins/<plugin>/.claude-plugin/plugin.json` del plugin que cambió, commit y push.
+2. Commit y PR a `main`. Tras el merge, `/mp-core:marketplace-release` sube las versiones (plugins y repo), escribe los CHANGELOG y crea los tags.
 3. En cada equipo: `/plugin marketplace update mp-marketplace` y `/plugin update <plugin>`. Un cambio en `mp-core` llega a todos los perfiles.
 4. Si cambió algo en `bootstrap/` (permisos, MCP, plugins de terceros): volver a correr `bootstrap/setup.sh`.
 
