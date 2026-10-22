@@ -1,7 +1,11 @@
 {
   "name": "mp-marketplace",
-  "owner": { "name": "JP León" },
-  "metadata": { "description": "Marketplace privado con mis perfiles de Claude Code (mp = my-profile)." },
+  "owner": {
+    "name": "JP León"
+  },
+  "metadata": {
+    "description": "Marketplace privado con mis perfiles de Claude Code (mp = my-profile)."
+  },
   "plugins": [
     {
       "name": "mp-core",
@@ -12,6 +16,11 @@
       "name": "mp",
       "source": "./plugins/mp",
       "description": "Perfil técnico: flow, flow-auto y agentes flow-*. Depende de mp-core."
+    },
+    {
+      "name": "mp-lp",
+      "source": "./plugins/mp-lp",
+      "description": "Perfil de landing pages: flow ligero lp (Astro + TS + Tailwind + shadcn) con agentes de SEO, movimiento, medios y QA. Depende de mp-core."
     }
   ]
 }

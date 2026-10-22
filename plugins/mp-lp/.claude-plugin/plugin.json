@@ -1,0 +1,8 @@
+{
+  "name": "mp-lp",
+  "description": "Perfil de landing pages de Claude Code (Astro + TypeScript + Tailwind + shadcn): flow ligero lp con agentes de estrategia, diseño, build, movimiento, medios, SEO y QA. Taiga opcional vía mp-core.",
+  "version": "0.1.0",
+  "author": { "name": "JP León" },
+  "repository": "https://github.com/juanleon8581/claude-jp-profile",
+  "dependencies": ["mp-core"]
+}

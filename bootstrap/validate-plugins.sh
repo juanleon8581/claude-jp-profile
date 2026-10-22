@@ -14,6 +14,7 @@ command -v jq >/dev/null 2>&1 || { echo "✖ jq no está instalado"; exit 1; }
 sec "Marketplace"
 jq -e . "$MJ" >/dev/null 2>&1 && pass "marketplace.json válido" || { bad "marketplace.json ausente o inválido"; exit 1; }
 names=$(jq -r '.plugins[].name' "$MJ")
+alt=$(echo "$names" | awk '{print length, $0}' | sort -rn | cut -d" " -f2- | paste -sd"|" -)   # nombres de plugin, el más largo primero
 dup=$(echo "$names" | sort | uniq -d)
 [ -z "$dup" ] && pass "nombres de plugin únicos" || bad "nombres repetidos: $dup"
 
@@ -52,9 +53,19 @@ for name in $names; do
   # carpeta hooks vacía o sin hooks.json no debe existir
   [ -d "$dir/hooks" ] && [ ! -f "$hj" ] && bad "hooks/ sin hooks.json"
 
+  # el name del frontmatter de agentes y skills coincide con su archivo/carpeta
+  nm=0
+  for f in "$dir"/agents/*.md; do [ -e "$f" ] || continue
+    n=$(sed -n 's/^name: *//p' "$f" | head -1); [ "$n" = "$(basename "$f" .md)" ] || { bad "agente $(basename "$f"): name '$n' no coincide con el archivo"; nm=1; }
+  done
+  for f in "$dir"/skills/*/SKILL.md; do [ -e "$f" ] || continue
+    n=$(sed -n 's/^name: *//p' "$f" | head -1); [ "$n" = "$(basename "$(dirname "$f")")" ] || { bad "skill $(basename "$(dirname "$f")"): name '$n' no coincide con la carpeta"; nm=1; }
+  done
+  [ "$nm" -eq 0 ] && pass "name de agentes y skills coincide con su archivo"
+
   # referencias a comandos/skills/agentes de plugins: <plugin>:<nombre> debe existir
   badref=0
-  for ref in $(grep -rhoE '(^|[^A-Za-z0-9_/-])/?(mp-core|mp):[a-z][a-z-]*' "$dir" 2>/dev/null | sed -E 's#^[^a-z]*/?##' | sort -u); do
+  for ref in $(grep -rhoE "(^|[^A-Za-z0-9_/-])/?($alt):[a-z][a-z-]*" "$dir" 2>/dev/null | sed -E 's#^[^a-z]*/?##' | sort -u); do
     pl=${ref%%:*}; it=${ref#*:}
     t="$ROOT/plugins/$pl"
     if [ -e "$t/commands/$it.md" ] || [ -e "$t/skills/$it/SKILL.md" ] || [ -e "$t/agents/$it.md" ]; then :
