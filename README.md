@@ -1,6 +1,6 @@
 # claude-jp-profile
 
-Mis perfiles de Claude Code como plugins privados (`mp` = _my-profile_) dentro de un marketplace (`mp-marketplace`). Lo común vive en `mp-core`; cada perfil (`mp` técnico, `mp-lp` landing pages) lo declara como dependencia (`"dependencies": ["mp-core"]` en su `plugin.json`).
+Mis perfiles de Claude Code como plugins (`mp` = _my-profile_) dentro de un marketplace (`mp-marketplace`). Lo común vive en `mp-core`; cada perfil (`mp` técnico, `mp-lp` landing pages) lo declara como dependencia (`"dependencies": ["mp-core"]` en su `plugin.json`).
 
 ## Qué incluye
 
@@ -68,10 +68,7 @@ Requisitos generales: `claude` (v1.0.33+), `jq`, `node`/`npx` (22.13+ por la sta
 Para el perfil de landing, además: Chrome o Chromium (Lighthouse mide rendimiento con él) y, opcional, `ffmpeg` (solo si hay video). `terminal-browser` (ghostty o kitty, sin tmux) lo usa el `manual-tester` de ambos flujos.
 
 ```bash
-# 1. Acceso al repo privado (HTTPS con las credenciales de gh)
-gh auth login && gh auth setup-git
-
-# 2. Clonar y ejecutar el bootstrap (una vez por equipo; pide los datos de los MCP, ver sección siguiente)
+# 1. Clonar y ejecutar el bootstrap (una vez por equipo; pide los datos de los MCP, ver sección siguiente)
 #    Instala plugins de terceros (diseño, humanizer), las skills de Emil Kowalski, MCPs, settings y statusline
 git clone https://github.com/juanleon8581/claude-jp-profile ~/claude-jp-profile
 ~/claude-jp-profile/bootstrap/setup.sh
@@ -121,7 +118,6 @@ Prueba aislada sin tocar la config real: `CLAUDE_CONFIG_DIR=~/.claude-test ./boo
 
 Otros datos por equipo:
 
-- **GitHub**: `gh auth login` para clonar. Para que el marketplace privado se actualice solo, exporta `GITHUB_TOKEN` (scope `repo`) en el shell.
 - **Context7**: `setup.sh` ejecuta `npx ctx7 setup --cli --claude`. Muestra un link y un código (device flow): ábrelo en cualquier navegador e inicia sesión. La key queda gestionada por ctx7; se administra en https://context7.com/dashboard. Para saltarlo: `SKIP_CTX7=1 ./bootstrap/setup.sh`.
 - **Plugins de terceros**: se descargan solos al abrir claude la primera vez (confirma la instalación si lo pide).
 
@@ -158,3 +154,7 @@ Dos niveles (SemVer en ambos):
 - Tras migrar, borrar las copias locales de `~/.claude/{skills,agents,commands}` que ahora vienen del plugin, para no duplicar.
 - El modelo (`model`) no se fija en `bootstrap/`: cada equipo elige el suyo (p. ej. `/model`).
 - Excluido a propósito: `terminal-browser` (se instala con su propia herramienta), `sdd`, `handoff`, `vault`, `pencil`, `obsidian` y `claude-seo` (en desuso).
+
+## Licencia
+
+[MIT](LICENSE)
