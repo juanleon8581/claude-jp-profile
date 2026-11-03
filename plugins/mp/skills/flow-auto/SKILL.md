@@ -1,21 +1,20 @@
 ---
 name: flow-auto
 description: >-
-  Versión multiagente de `flow`. Orquesta el mismo flujo estandarizado (Spec-Driven Development vía OpenSpec
-  envuelto en Taiga como capa de Scrum/negocio) pero delega el trabajo de la fase de desarrollo a agentes
+  Orquesta el flujo estandarizado de desarrollo (Spec-Driven Development vía OpenSpec envuelto en Taiga como
+  capa de Scrum/negocio), con agentes especializados. Delega el trabajo de la fase de desarrollo a agentes
   especializados (flow-architect, ui-designer, flow-coder, ui-coder, ui-refiner, flow-tester,
   flow-reviewer) en ciclos por bloque de tasks.md, y
-  delega la documentación de Taiga en flow-documenter, deteniéndose siempre en los gates manuales. Activar cuando el usuario escriba "/flow-auto", pida ejecutar un
-  bloque del change con agentes, o pida el modo multiagente del flow. Subcomandos: start, explore, review, sync,
+  delega la documentación de Taiga en flow-documenter, deteniéndose siempre en los gates manuales. Activar cuando el usuario escriba "/flow-auto" (o su alias "/flow"), pida iniciar una
+  feature o fix bajo este proceso, pregunte en qué fase está un change, o pida ejecutar un bloque del change con agentes. Subcomandos: start, explore, review, sync,
   apply, approve, docs, sync-check, done, test, release, status. Sin argumentos actúa como orquestador: lee el estado del change
   activo, ejecuta el siguiente paso automatizable y se detiene en el siguiente gate manual.
 ---
 
-# flow-auto — flow con agentes especializados
+# flow-auto — SDD (OpenSpec) + Scrum (Taiga) con agentes especializados
 
-Copia de la skill `flow` que agrega la orquestación de agentes. Todo lo que dice `flow` sigue vigente; este archivo
-**solo cambia cómo se ejecutan las fases 2, 3, 5 y 6**, agrega los requisitos de UI de la fase 0 y los subcomandos
-`apply` y `approve`.
+Es la única skill del flujo y es autocontenida: contiene las 7 fases, el estado, los subcomandos y las reglas.
+`/flow` es un alias de `/flow-auto`: ambos activan esta skill con los mismos subcomandos.
 
 Skill de nivel usuario. No vive en ningún proyecto específico — se usa en cualquier repo donde el usuario trabaje
 bajo este proceso. El proyecto activo sí necesita tener OpenSpec inicializado (ver Fase 0).
@@ -78,7 +77,7 @@ Los tres de UI (`ui-designer`, `ui-coder`, `ui-refiner`) son **compartidos con e
 | `ui-brief.md` | orquestador | a partir del informe de `ui-designer`; solo se guarda tras la aprobación del usuario |
 | Tests | `flow-tester` | dentro de un bloque |
 | Checkboxes de `tasks.md` | orquestador | solo tras verificar el bloque (excepción única) |
-| Resto de artefactos OpenSpec | solo `openspec-explore` | nunca agentes ni el orquestador directo |
+| Resto de artefactos OpenSpec (proposal, design, specs, tasks) | `opsx:propose` (o `opsx:new`/`opsx:continue`/`opsx:ff`) | **solo** tras la orden explícita del usuario, cuando la exploración cerró; nunca durante `explore`, nunca agentes ni el orquestador a mano |
 | `taiga-sync.json` | orquestador | siempre |
 | Taiga (`mcp__taiga__*`) | `flow-documenter` en modo `apply` | solo con un payload que el usuario aprobó (el orquestador lo transmite textual) |
 | git (add/commit/push/branch) | orquestador | **solo** por orden directa del usuario |
@@ -192,7 +191,7 @@ principios.
 
 ### Fase 1 — Intake (Taiga)
 
-Misma estructura que en `flow`. La redacción de la US, las tasks pre-spec y de cada definición de negocio
+La redacción de la US, las tasks pre-spec y de cada definición de negocio
 la hace `flow-documenter` (`draft` → aprobación → `apply`); él sigue las reglas de `taiga-ticket-docs`.
 
 Estructura obligatoria antes de poder pasar a fase 2:
@@ -216,17 +215,40 @@ están en Done.
 
 ### Fase 2 — Exploración técnica (OpenSpec)
 
-Invocar el skill `openspec-explore` (alias `opsx:explore`) vía la tool Skill. Es el único punto de entrada al lado
-técnico — él orquesta internamente la creación y modificación de todos los artefactos que hagan falta (proposal,
-specs, design, tasks), decide él mismo si el change amerita `design.md`, y consolida ideas / cierra gaps de
-negocio y técnicos. No se invocan directamente `opsx:new`, `opsx:propose`, `opsx:continue` ni `opsx:ff` desde
-nuestra skill — eso es responsabilidad interna de `opsx:explore`.
+Invocar el skill `openspec-explore` (alias `opsx:explore`) vía la tool Skill. **Explore es una conversación, no
+una fase de escritura.** Su producto es una definición técnica acordada, no archivos: se lee código, se consulta a
+los agentes, se plantean opciones y se cierran decisiones con el usuario.
+
+**Prohibido durante explore (regla dura):**
+- Crear el change (`openspec new change`), escribir `proposal.md`, `design.md`, `specs/**`, `tasks.md` o
+  `ui-brief.md`, ni pedirle a `openspec-explore` que "cree los artefactos". Si el argumento que se le pasa al skill
+  dice "crear artefactos", está mal armado: el argumento solo describe el tema, las decisiones ya tomadas y las
+  dudas a resolver.
+- Escribir artefactos en paralelo a las consultas a los agentes o antes de haber presentado sus hallazgos al
+  usuario.
+
+**Flujo esperado, en este orden:**
+1. **Ejecutar `/opsx:explore` de forma explícita** (tool Skill con `skill: "opsx:explore"`, siempre como primer
+   acto de la fase; nunca se sustituye por una conversación "a mano" fuera del skill). Dentro de esa sesión de
+   explore se conversa con `flow-architect` (código real, RLS, riesgos) y `ui-designer` (UX/UI) para cerrar huecos
+   y dudas entre las partes. Si ellos lo consideran necesario (negocio, alto impacto: migraciones, seguridad,
+   alcance), **incluyen al usuario en la conversación** para decidir; el orquestador resume sus hallazgos
+   separando lo técnico de lo de negocio y espera la respuesta. Si el skill no se ejecutó, la fase 2 no empezó.
+2. El usuario confirma que la definición quedó cerrada.
+3. **Solo entonces**, y solo por orden explícita del usuario, se corre `opsx:propose` (o `opsx:new` + `opsx:ff`/
+   `opsx:continue`) para construir los artefactos a partir de lo acordado. El `ui-brief.md` se guarda en ese
+   momento, con el informe del diseñador ya validado.
+4. Fase 3: el usuario lee y aprueba los artefactos.
+
+Si hay duda sobre si ya toca escribir artefactos, **no se escribe**: se pregunta.
 
 **Aporte de agentes en esta fase:** durante la exploración se puede consultar a `flow-architect` (tool `Agent`)
 para investigar el código real, cruzar artefactos o evaluar una decisión técnica, y a `ui-designer` cuando el
-change tenga interfaz y haya que aclarar decisiones de UX/UI (estados, flujos, componentes). La conversación con el usuario y
-la creación/modificación de artefactos **siguen en la sesión principal vía `openspec-explore`**. El informe del
-architect se resume al usuario; sus "preguntas de negocio" se le plantean al usuario, nunca se resuelven solas.
+change tenga interfaz y haya que aclarar decisiones de UX/UI (estados, flujos, componentes). La conversación con el
+usuario **sigue en la sesión principal vía `openspec-explore`** y no escribe artefactos. El informe del architect y
+del designer se resume al usuario; sus "preguntas de negocio" se le plantean al usuario, nunca se resuelven solas.
+Un agente que informe un hallazgo de alto impacto (migración, seguridad, alcance) lo deja como decisión abierta
+para el usuario, no como algo ya resuelto en un archivo.
 
 El change-id que resulte queda como **única fuente de verdad** para identificar el trabajo — no tiene que
 coincidir con el nombre de la rama git (`release/X.Y.Z`, `feature/X.Y.Z-<slug>`). Si el nombre de rama sirve, se
@@ -249,8 +271,8 @@ al checklist, separados en técnicos y de negocio. Si el change tiene interfaz, 
 revisar que specs y tasks de UI cubran estados (vacío/carga/error), responsive y accesibilidad; sus hallazgos van en
 una sección propia. Es informativo: no aprueba ni bloquea por sí mismo.
 
-- **Gap técnico** (algo que dev puede resolver solo) → se le informa a `openspec-explore` para iterar in-place
-  sobre los artefactos existentes. No se vuelve a fase 1.
+- **Gap técnico** (algo que dev puede resolver solo) → se retoma la conversación con `openspec-explore` y, con la
+  corrección acordada, se actualizan los artefactos existentes in-place (a orden del usuario). No se vuelve a fase 1.
 - **Gap de negocio** (requiere una definición que dev no puede tomar solo) → vuelve a fase 1: se crea/escala un
   ticket Taiga hacia el área de negocio para cerrar esa definición. Una vez cerrado, se retoma `openspec-explore`
   con la info nueva.
@@ -514,7 +536,10 @@ Parsear el argumento recibido tras `/flow-auto`. Si viene vacío, es el modo orq
 - **`flow-auto start "<necesidad>"`** — Fase 1. Crea (o ayuda a crear) Épica opcional + US + Tasks pre-spec en
   Taiga vía `mcp__taiga__*`. No avanza de fase hasta que las Tasks estén en Done.
 - **`flow-auto explore`** — Fase 2. Verifica Fase 0 (openspec inicializado) y gate de fase 1 (Tasks Done). Invoca
-  `openspec-explore`; puede consultar a `flow-architect`.
+  `openspec-explore` como conversación; consulta a `flow-architect` y `ui-designer`. **No escribe artefactos ni
+  crea el change.** Termina cuando el usuario da por cerrada la definición.
+- **`flow-auto propose`** — Fase 2→3. Solo por orden explícita del usuario y después de `explore`: invoca
+  `opsx:propose` con lo acordado para construir los artefactos (y guarda `ui-brief.md` si hay UI).
 - **`flow-auto review`** — Fase 3. Lanza `flow-architect` sobre los artefactos y muestra sus hallazgos junto al
   checklist de lectura (proposal/specs/design/tasks) para revisión manual. Según lo que el usuario indique,
   deriva a iteración con `openspec-explore` (gap técnico), a fase 1 (gap de negocio), o a `flow-auto apply`
@@ -658,8 +683,9 @@ escriban. En apply ejecuta solo el payload aprobado y verifica releyendo. Nunca 
   para que decida manualmente — nunca abortar ni revertir sin avisar.
 - En `update_*` de Taiga, reenviar siempre la descripción completa (los updates parciales pueden truncarla).
 - El nombre de rama nunca bloquea ni tiene que coincidir con el change-id de OpenSpec.
-- La skill `openspec-explore` (`opsx:explore`) es el único punto de entrada para creación/modificación de
-  artefactos OpenSpec. `opsx:verify` y `opsx:archive` son invocaciones directas y separadas, propias de fase 7.
+- `openspec-explore` (`opsx:explore`) es solo conversación y nunca escribe artefactos. Los artefactos los construye
+  `opsx:propose` por orden explícita del usuario, después de explorar. `opsx:verify` y `opsx:archive` son
+  invocaciones directas y separadas, propias de fase 7.
   En `flow-auto` el rol de `opsx:apply` lo cumple el ciclo por bloques de la fase 5.
 
 ## Herramientas

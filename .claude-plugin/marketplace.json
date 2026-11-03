@@ -16,7 +16,7 @@
     {
       "name": "mp",
       "source": "./plugins/mp",
-      "description": "Perfil técnico: flow, flow-auto y agentes flow-*. Depende de mp-core."
+      "description": "Perfil técnico: flow-auto y agentes flow-*. Depende de mp-core."
     },
     {
       "name": "mp-lp",

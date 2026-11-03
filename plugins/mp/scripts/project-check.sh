@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Diagnóstico de PROYECTO para el flujo flow/flow-auto: OpenSpec, CLAUDE.md, reglas de arquitectura y requisitos de UI.
+# Diagnóstico de PROYECTO para el flujo flow-auto: OpenSpec, CLAUDE.md, reglas de arquitectura y requisitos de UI.
 # Solo lectura. Uso: project-check.sh [ruta-del-proyecto]. Exit 1 si falta algo obligatorio (✖).
 set -uo pipefail
 ROOT="${1:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
@@ -34,7 +34,7 @@ fi
 sec "CLAUDE.md"
 if [ -f CLAUDE.md ]; then
   pass "CLAUDE.md"
-  grep -qiE 'test|prueba' CLAUDE.md && pass "menciona comando de pruebas (lo usa 'flow test')" || wrn "no se ve comando de pruebas" "/mp:init propone una sección de comandos"
+  grep -qiE 'test|prueba' CLAUDE.md && pass "menciona comando de pruebas (lo usa 'flow-auto test')" || wrn "no se ve comando de pruebas" "/mp:init propone una sección de comandos"
   grep -q 'architecture.md' CLAUDE.md && pass "apunta a openspec/architecture.md" || wrn "no apunta a la arquitectura" "/mp:init agrega el puntero"
 else
   bad "CLAUDE.md no existe" "/mp:init lo crea"

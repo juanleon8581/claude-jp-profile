@@ -1,9 +1,9 @@
 ---
 name: flow-architecture
-description: Lente arquitectónica del agente `flow-architect` para revisar los artefactos de un change de OpenSpec (proposal, specs, design, tasks) contra el código real - capas, dirección de dependencias, límites, modelo de dominio, seguridad y datos. Uso interno del flujo `flow`/`flow-auto`; no activar para escribir código ni para consultas generales de arquitectura. Cárgala solo cuando se te pida revisar o explorar la arquitectura de un change.
+description: Lente arquitectónica del agente `flow-architect` para revisar los artefactos de un change de OpenSpec (proposal, specs, design, tasks) contra el código real - capas, dirección de dependencias, límites, modelo de dominio, seguridad y datos. Uso interno del flujo `flow-auto`; no activar para escribir código ni para consultas generales de arquitectura. Cárgala solo cuando se te pida revisar o explorar la arquitectura de un change.
 ---
 
-# Lente arquitectónica del flow
+# Lente arquitectónica del flujo flow-auto
 
 Conocimiento para **revisar** artefactos, no para enseñar arquitectura. Cada referencia es una lista de chequeos: qué mirar en `design.md`, `specs/` y `tasks.md`, y qué hallazgo reportar si falla. La documentación es responsabilidad de OpenSpec; aquí solo se verifica que lo documentado sea coherente.
 
