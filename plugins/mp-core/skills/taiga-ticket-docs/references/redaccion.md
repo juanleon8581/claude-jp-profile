@@ -25,7 +25,7 @@ No incluyas, aunque sea cierto:
   el equipo de diseño", fases del flujo, aprobaciones internas, revisiones o rondas de corrección. Es
   irrelevante para un flujo Scrum. Si una decisión importa a negocio, di la decisión, no quién la tomó ni
   cómo.
-- **Artefactos y herramientas internas**: OpenSpec, specs, propuesta, tareas, brief, `DESIGN.md`, `flow`,
+- **Artefactos y herramientas internas**: OpenSpec, specs, propuesta, tareas, brief, `DESIGN.md`, `flow-auto`,
   git, ramas, commits, PR.
 - **Detalle de implementación o de calidad técnica**: nombres de archivos, componentes o funciones; pruebas
   automáticas, cobertura, build, lint; estructura de código.

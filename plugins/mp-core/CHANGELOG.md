@@ -1,5 +1,14 @@
 # Changelog — mp-core
 
+## [1.1.0] - 2026-11-03
+
+### Added
+- `promote` detecta también los archivos del repo que la caché no contiene (`README.md`, `marketplace.json`, `plugin.json`, `CHANGELOG.md`, `bootstrap/`), con rutas `repo/<ruta>` en `scan`, `diff` y `open` (22ef1ef).
+
+### Fixed
+- `promote` indica como siguiente paso `marketplace-release` en la rama del PR antes del merge, en lugar de `release` (22ef1ef).
+- `manual-tester` y `taiga-ticket-docs` dejan de nombrar la skill `flow`, que ya no existe (6b8ed89).
+
 ## [1.0.1] - 2026-10-22
 
 ### Changed

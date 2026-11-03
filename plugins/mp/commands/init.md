@@ -1,11 +1,11 @@
 ---
-description: "Prepara el proyecto actual para el flujo flow: OpenSpec, CLAUDE.md (comandos) y reglas de arquitectura para flow-architect"
+description: "Prepara el proyecto actual para el flujo flow-auto: OpenSpec, CLAUDE.md (comandos) y reglas de arquitectura para flow-architect"
 allowed-tools: Bash(bash:*), Bash(openspec:*), Read, Write, Edit, Glob, Grep
 ---
 
 # /mp:init
 
-Prepara el **proyecto activo** (no el entorno de usuario; eso es `/mp-core:doctor`) con lo que `flow` y `flow-auto` necesitan. Es idempotente: solo completa lo que falta y **nunca sobrescribe** contenido existente. No hace commit y no toca Taiga.
+Prepara el **proyecto activo** (no el entorno de usuario; eso es `/mp-core:doctor`) con lo que `flow-auto` necesita. Es idempotente: solo completa lo que falta y **nunca sobrescribe** contenido existente. No hace commit y no toca Taiga.
 
 ## 1. Diagnóstico
 
@@ -25,7 +25,7 @@ Con el diagnóstico y leyendo el repo (`CLAUDE.md`, `package.json`, estructura d
 
 ### b) `CLAUDE.md` del proyecto
 - Si falta, créalo con título y las secciones de abajo. Si existe, agrega solo lo que no esté.
-- **Comandos:** sección con los comandos de prueba, build y formato (`flow test` lee de aquí). Propón los que salgan de `package.json` u otro manifiesto y pide confirmación; si no los puedes inferir, pregunta.
+- **Comandos:** sección con los comandos de prueba, build y formato (`flow-auto test` lee de aquí). Propón los que salgan de `package.json` u otro manifiesto y pide confirmación; si no los puedes inferir, pregunta.
 - **Arquitectura:** una línea de puntero: ``Reglas de arquitectura: ver `openspec/architecture.md`.`` No copies las reglas aquí (`CLAUDE.md` se carga en toda sesión).
 
 ### c) `openspec/architecture.md`
