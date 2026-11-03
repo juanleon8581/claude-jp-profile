@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Promueve cambios hechos en caliente en la caché de los plugins del marketplace mp-marketplace hacia el repo, vía Pull Request.
 # Las rutas tienen la forma <plugin>/<ruta relativa al plugin>, ej. mp/agents/flow-coder.md
+# Rutas: <plugin>/<ruta> (desde la caché) o repo/<ruta> (archivo del repo que la caché no tiene: README, marketplace.json, plugin.json...).
 # Subcomandos:
 #   scan                         lista los archivos que difieren de la base instalada (solo lectura)
 #   diff <plugin/ruta>           muestra el diff de un archivo
@@ -11,7 +12,7 @@ CFG="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 IP="$CFG/plugins/installed_plugins.json"
 KM="$CFG/plugins/known_marketplaces.json"
 MKT="mp-marketplace"
-DIRS="agents commands hooks scripts skills"   # plugin.json queda fuera a propósito (la versión se sube al hacer release)
+DIRS="agents commands hooks scripts skills"   # carpetas que se leen de la caché; el resto del repo entra como repo/<ruta> desde el clon
 
 die(){ echo "✖ $1" >&2; exit 1; }
 for c in jq git; do command -v "$c" >/dev/null 2>&1 || die "$c no está instalado"; done
@@ -65,11 +66,32 @@ cmd_scan(){
       printf '%s\t%s\t%s/%s\n' "$st" "$fl" "$pl" "$p"; n=$((n+1))
     done < <(list_paths)
   done
+  # Archivos del repo que la caché no contiene (README, marketplace.json, plugin.json, CHANGELOG, bootstrap...):
+  # cambios sin commitear en el clon, fuera de las carpetas que ya cubre la caché. Se listan como repo/<ruta>.
+  while IFS= read -r l; do
+    [ -n "$l" ] || continue
+    code="${l:0:2}"; p="${l:3}"
+    case "$p" in plugins/*/agents/*|plugins/*/commands/*|plugins/*/hooks/*|plugins/*/scripts/*|plugins/*/skills/*) continue;; esac
+    case "$code" in '??') st=A;; *D*) st=D;; *) st=M;; esac
+    b=$(G rev-parse -q --verify "HEAD:$p" 2>/dev/null || true)
+    m=$(G rev-parse -q --verify "$HEAD_REF:$p" 2>/dev/null || true)
+    c=""; [ -f "$CLONE/$p" ] && c=$(git hash-object "$CLONE/$p")
+    [ "$c" = "$m" ] && continue                 # main ya tiene exactamente eso
+    fl=ok; [ "$m" != "$b" ] && fl=CONFLICTO
+    printf '%s\t%s\trepo/%s\n' "$st" "$fl" "$p"; n=$((n+1))
+  done < <(G status --porcelain --untracked-files=all)
   [ "$n" -eq 0 ] && echo "(sin cambios locales para promover)"
   return 0
 }
 
 cmd_diff(){
+  if [ "${1:-}" != "${1#repo/}" ]; then   # archivo del repo fuera de la caché
+    p="${1#repo/}"; t=$(mktemp -d); trap 'rm -rf "$t"' RETURN
+    G show "HEAD:$p" >"$t/base" 2>/dev/null || : >"$t/base"
+    c="$CLONE/$p"; [ -f "$c" ] || c=/dev/null
+    echo "── tu cambio (HEAD → clon) ──"; diff -u --label "base/$p" --label "local/$p" "$t/base" "$c"
+    return 0
+  fi
   split_load "${1:?ruta requerida}"; p="$REL"
   t=$(mktemp -d); trap 'rm -rf "$t"' RETURN
   G show "$BASE:$SUB/$p" >"$t/base" 2>/dev/null || : >"$t/base"
@@ -94,6 +116,11 @@ cmd_open(){
   trap cleanup EXIT
   G worktree add -q -b "$branch" "$wt" "$HEAD_REF" || die "no se pudo crear el worktree"
   for full in "$@"; do
+    if [ "$full" != "${full#repo/}" ]; then   # archivo del repo: se copia desde el clon, sin pasar por la caché
+      rp="${full#repo/}"
+      if [ -f "$CLONE/$rp" ]; then mkdir -p "$wt/$(dirname "$rp")"; cp -p "$CLONE/$rp" "$wt/$rp"; else rm -f "$wt/$rp"; fi
+      git -C "$wt" add -A -- "$rp"; continue
+    fi
     split_load "$full"
     case " $DIRS " in *" ${REL%%/*} "*) ;; *) die "ruta fuera de alcance: $full";; esac
     if [ -f "$CACHE/$REL" ]; then mkdir -p "$wt/$SUB/$(dirname "$REL")"; cp -p "$CACHE/$REL" "$wt/$SUB/$REL"
